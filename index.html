@@ -134,7 +134,7 @@
 </footer>
 
 <script>
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRtiBEyirRS73NI23sRAllDT7g3aphl5uYmhDIRHKhzwjYDZD8c0YmNv19WfkBgHXZxTLlS5HnROUOz/pub?output=csv';
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRtiBEyirRS73NI23sRAllDT7g3aphl5uYmhDIRHKhzwjYDZD8c0YmNv19WfkBgHXZxTLlS5HnROUOz/pub?gid=698284721&single=true&output=csv';
 
 const CAT_ICONS = {
   'Taxi':'🚕',
@@ -164,7 +164,7 @@ function parseCSV(text) {
     const obj = {};
     headers.forEach((h, i) => { obj[h] = (cols[i] || '').trim(); });
     return obj;
-  }).filter(r => r['Nombre'] && r['Nombre'].length > 0);
+  }).filter(r => r['Nombre'] && r['Nombre'].length > 0 && r['Nombre'].toLowerCase() !== 'timestamp');
 }
 
 function renderCats(data) {
@@ -196,8 +196,10 @@ function renderListings(data) {
   noRes.style.display = 'none';
   el.innerHTML = data.map(r => {
     const stars = '★'.repeat(Math.min(parseInt(r['Estrellas']) || 5, 5)) + '☆'.repeat(5 - Math.min(parseInt(r['Estrellas']) || 5, 5));
-    const isNew = (r['Estado'] || '').toLowerCase() === 'nuevo';
-    const badge = isNew ? '<span class="badge new">Nuevo</span>' : '<span class="badge verified">✓ Verificado</span>';
+    const estado = (r['Estado'] || '').toLowerCase();
+    const isNew = estado === 'nuevo';
+    const isActive = estado === 'activo' || estado === 'verificado';
+    const badge = isNew ? '<span class="badge new">Nuevo</span>' : isActive ? '<span class="badge verified">✓ Verificado</span>' : '';
     const tel = r['Teléfono'] ? `href="tel:${r['Teléfono']}"` : 'href="#" onclick="return false"';
     const hours = r['Horario'] ? `<div class="biz-hours"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>${r['Horario']}</div>` : '';
     return `
