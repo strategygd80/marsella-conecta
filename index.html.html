@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marsella Conecta</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600&family=DM+Sans:wght@400;500&display=swap');
+
+  /* ── Reset & Base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #F7F9F8;
+    color: #1C1C1C;
+    min-height: 100vh;
+  }
+
+  /* ── Design Tokens ── */
+  :root {
+    --green:       #1A5C36;
+    --green-mid:   #2E7D52;
+    --green-light: #EDF5F0;
+    --accent:      #E8A020;
+    --muted:       #5A6272;
+    --border:      #D4DDD8;
+    --bg:          #F7F9F8;
+    --white:       #FFFFFF;
+    --radius-sm:   8px;
+    --radius-md:   12px;
+    --radius-lg:   16px;
+  }
+
+  /* ── Header / Hero ── */
+  header {
+    background: var(--green);
+    padding: 28px 20px 24px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--accent); }
+  .tagline {
+    font-size: 13px;
+    color: rgba(255,255,255,0.75);
+    margin-top: 4px;
+  }
+  .search-wrap {
+    margin: 14px auto 0;
+    max-width: 480px;
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border-radius: 40px;
+    padding: 10px 16px;
+    gap: 10px;
+  }
+  .search-wrap svg { flex-shrink: 0; color: var(--muted); }
+  .search-wrap input {
+    border: none;
+    outline: none;
+    font-size: 14px;
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    color: #1C1C1C;
+  }
+  .search-wrap input::placeholder { color: #aaa; }
+
+  /* ── Filter Pills ── */
+  .pills {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 16px 20px 0;
+    scrollbar-width: none;
+  }
+  .pills::-webkit-scrollbar { display: none; }
+  .pill {
+    flex-shrink: 0;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .pill.active, .pill:hover {
+    background: var(--green);
+    color: #fff;
+    border-color: var(--green);
+  }
+
+  /* ── Section Header ── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 20px 20px 12px;
+  }
+
+  /* ── Category Grid ── */
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+    padding: 0 20px 20px;
+  }
+  .cat-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .cat-card:hover {
+    border-color: var(--green-mid);
+    background: var(--green-light);
+  }
+  .cat-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+  .cat-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+  }
+
+  /* ── Business Listing Cards ── */
+  .listings { padding: 0 20px 20px; }
+  .biz-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    text-decoration: none;
+    color: inherit;
+  }
+  .biz-card:hover {
+    border-color: var(--green-mid);
+    box-shadow: 0 2px 12px rgba(26,92,54,0.08);
+  }
+  .biz-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: var(--radius-sm);
+    background: var(--green-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .biz-info { flex: 1; min-width: 0; }
+  .biz-name { font-size: 15px; font-weight: 500; }
+  .biz-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .biz-stars { font-size: 12px; color: var(--accent); margin-top: 4px; }
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 20px;
+    margin-top: 5px;
+  }
+  .badge.verified { background: #EDF7F1; color: #1A6B3A; }
+  .badge.new      { background: #FEF3DC; color: #A0600A; }
+  .biz-chevron { color: var(--border); font-size: 18px; margin-left: auto; flex-shrink: 0; }
+
+  /* ── No Results ── */
+  .no-results {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  /* ── CTA Banner ── */
+  .cta-banner {
+    margin: 4px 20px 24px;
+    background: var(--green);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .cta-text { font-size: 14px; line-height: 1.5; }
+  .cta-text strong { font-size: 15px; display: block; margin-bottom: 2px; }
+  .cta-btn {
+    flex-shrink: 0;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    white-space: nowrap;
+  }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    padding: 16px 20px 32px;
+    border-top: 1px solid var(--border);
+  }
+  footer a { color: var(--green); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     SETUP: Replace SHEET_ID below with your
+     published Google Sheet CSV URL
+     ═══════════════════════════════════════════ -->
+
+<header>
+  <div class="logo">Marsella <span>Conecta</span></div>
+  <p class="tagline">Encuentra negocios y servicios de confianza en Marsella</p>
+  <div class="search-wrap">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="searchInput" placeholder="Buscar: plomero, restaurante, taxi...">
+  </div>
+</header>
+
+<!-- Filter Pills (populated by JS from sheet data) -->
+<div class="pills" id="pills">
+  <div class="pill active" data-cat="Todos" onclick="filterCat(this)">Todos</div>
+</div>
+
+<!-- Categories section -->
+<div class="section-label">Categorías</div>
+<div class="cat-grid" id="catGrid"></div>
+
+<!-- Featured listings -->
+<div class="section-label">Negocios</div>
+<div class="listings" id="listings"></div>
+<div class="no-results" id="noResults">No se encontraron negocios. Intenta otra búsqueda.</div>
+
+<!-- Register CTA -->
+<div class="cta-banner">
+  <div class="cta-text">
+    <strong>¿Tienes un negocio en Marsella?</strong>
+    Regístralo gratis y llega a más clientes.
+  </div>
+  <!-- Replace this href with your Google Form link -->
+  <button class="cta-btn" onclick="window.open('https://forms.gle/TU_FORM_AQUI','_blank')">Registrarme</button>
+</div>
+
+<footer>
+  © 2025 Marsella Conecta &nbsp;·&nbsp;
+  <a href="https://forms.gle/TU_FORM_AQUI" target="_blank">Registrar negocio</a>
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  CONFIGURATION — edit these two lines
+// ═══════════════════════════════════════════════════════════════
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/TU_SHEET_ID/export?format=csv&gid=0';
+// ↑ Replace TU_SHEET_ID with your Google Sheet ID
+// Sheet columns (row 1 = headers):
+//   A: Nombre | B: Categoría | C: Barrio | D: Teléfono | E: Descripción | F: Estado | G: Estrellas
+// ═══════════════════════════════════════════════════════════════
+
+const CAT_ICONS = {
+  'Plomería':       '🔧',
+  'Electricistas':  '⚡',
+  'Taxi':           '🚕',
+  'Comida':         '🍴',
+  'Construcción':   '🏗️',
+  'Jardinería':     '🌳',
+  'Salud':          '🏥',
+  'Educación':      '📚',
+  'Tiendas':        '🛒',
+  'Belleza':        '💅',
+  'Mecánica':       '🚗',
+  'Otros':          '📦',
+};
+
+let allData = [];
+let activeCat = 'Todos';
+
+// ── Parse CSV (simple, no external lib needed) ──
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g,''));
+  return lines.slice(1).map(line => {
+    const cols = line.match(/(".*?"|[^,]+)(?=,|$)/g) || [];
+    const obj = {};
+    headers.forEach((h, i) => {
+      obj[h] = (cols[i] || '').replace(/^"|"$/g,'').trim();
+    });
+    return obj;
+  }).filter(r => r['Nombre']);
+}
+
+// ── Render category grid ──
+function renderCats(data) {
+  const cats = [...new Set(data.map(r => r['Categoría']))].filter(Boolean);
+  const grid = document.getElementById('catGrid');
+  grid.innerHTML = cats.map(c => `
+    <div class="cat-card" onclick="filterCatByName('${c}')">
+      <div class="cat-icon">${CAT_ICONS[c] || '📦'}</div>
+      <div class="cat-label">${c}</div>
+    </div>`).join('');
+
+  // Populate pills
+  const pills = document.getElementById('pills');
+  cats.forEach(c => {
+    const pill = document.createElement('div');
+    pill.className = 'pill';
+    pill.dataset.cat = c;
+    pill.textContent = c;
+    pill.onclick = () => filterCat(pill);
+    pills.appendChild(pill);
+  });
+}
+
+// ── Render listing cards ──
+function renderListings(data) {
+  const el = document.getElementById('listings');
+  const noRes = document.getElementById('noResults');
+  if (!data.length) {
+    el.innerHTML = '';
+    noRes.style.display = 'block';
+    return;
+  }
+  noRes.style.display = 'none';
+  el.innerHTML = data.map(r => {
+    const stars = '★'.repeat(parseInt(r['Estrellas']) || 5) + '☆'.repeat(5 - (parseInt(r['Estrellas']) || 5));
+    const isNew = r['Estado'] === 'Nuevo';
+    const badge = isNew
+      ? '<span class="badge new">Nuevo</span>'
+      : '<span class="badge verified">✓ Verificado</span>';
+    const tel = r['Teléfono'] ? `href="tel:${r['Teléfono']}"` : 'href="#"';
+    return `
+      <a class="biz-card" ${tel}>
+        <div class="biz-avatar">${CAT_ICONS[r['Categoría']] || '📦'}</div>
+        <div class="biz-info">
+          <div class="biz-name">${r['Nombre']}</div>
+          <div class="biz-sub">${r['Categoría']} · ${r['Barrio'] || 'Marsella'}</div>
+          <div class="biz-stars">${stars}</div>
+          ${badge}
+        </div>
+        <span class="biz-chevron">›</span>
+      </a>`;
+  }).join('');
+}
+
+// ── Filter logic ──
+function filterCat(pillEl) {
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  pillEl.classList.add('active');
+  activeCat = pillEl.dataset.cat;
+  applyFilters();
+}
+function filterCatByName(name) {
+  const pill = document.querySelector(`.pill[data-cat="${name}"]`);
+  if (pill) filterCat(pill);
+}
+function applyFilters() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  let filtered = allData;
+  if (activeCat !== 'Todos') filtered = filtered.filter(r => r['Categoría'] === activeCat);
+  if (q) filtered = filtered.filter(r =>
+    Object.values(r).join(' ').toLowerCase().includes(q)
+  );
+  renderListings(filtered);
+}
+
+// ── Load data ──
+async function loadSheet() {
+  try {
+    const res = await fetch(SHEET_CSV_URL);
+    const text = await res.text();
+    allData = parseCSV(text);
+    renderCats(allData);
+    renderListings(allData);
+  } catch(e) {
+    // Fallback sample data if sheet isn't set up yet
+    allData = [
+      { Nombre:'Plomería Don Carlos', Categoría:'Plomería', Barrio:'Centro', Teléfono:'', Estrellas:'5', Estado:'Verificado' },
+      { Nombre:'Restaurante La Fogata', Categoría:'Comida', Barrio:'El Prado', Teléfono:'', Estrellas:'4', Estado:'Nuevo' },
+      { Nombre:'Electro Hernández', Categoría:'Electricistas', Barrio:'Zona Norte', Teléfono:'', Estrellas:'5', Estado:'Verificado' },
+      { Nombre:'Taxi Rápido Marsella', Categoría:'Taxi', Barrio:'Marsella', Teléfono:'', Estrellas:'4', Estado:'Verificado' },
+    ];
+    renderCats(allData);
+    renderListings(allData);
+  }
+}
+
+// ── Listeners ──
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+loadSheet();
+</script>
+</body>
+</html>
