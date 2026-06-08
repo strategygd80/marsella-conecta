@@ -127,7 +127,7 @@ const LIVE_SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT1uS_V8
 let sheetHeaders = [];
 
 window.addEventListener('DOMContentLoaded', () => {
-  // 1. Pull dynamic category parameters straight from your official configuration grid
+  // 1. Fetches official list terms to load custom dropdown pull-down options cleanly
   fetch(CONFIG_SHEET_URL)
     .then(res => res.text())
     .then(csv => {
@@ -135,7 +135,7 @@ window.addEventListener('DOMContentLoaded', () => {
       if(lines.length < 2) return;
       
       const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-      const catIdx = headers.indexOf('Categoría');
+      const catIdx = headers.findIndex(h => h.toLowerCase().includes('cat'));
       
       const categoryOptions = [];
       for(let i = 1; i < lines.length; i++) {
@@ -145,7 +145,7 @@ window.addEventListener('DOMContentLoaded', () => {
       buildDropdown(categoryOptions);
     }).catch(() => buildDropdown(['Transporte', 'Comida', 'Tienda', 'Servicios']));
 
-  // 2. Automatically generate text boxes for any custom column header added to Sheet 2
+  // 2. Automatically tracks modifications on Sheet 2 to build data inputs for any custom column added
   fetch(LIVE_SHEET_CSV)
     .then(res => res.text())
     .then(data => {
@@ -157,13 +157,13 @@ window.addEventListener('DOMContentLoaded', () => {
       const container = document.getElementById('dynamic_sheet_columns');
 
       sheetHeaders.forEach(col => {
-        if(!coreFields.includes(col) && col.trim() !== '') {
+        if(!coreFields.some(b => col.trim() === b) && col.trim() !== '') {
           container.style.display = 'block';
           const wrapper = document.createElement('div');
           wrapper.className = 'field';
           wrapper.innerHTML = `
             <label>${col}</label>
-            <input type="text" class="dynamic-input" data-column="${col}" placeholder="Enter parameter parameters for ${col.toLowerCase()}">
+            <input type="text" class="dynamic-input" data-column="${col}" placeholder="Enter parameter info for ${col.toLowerCase()}">
           `;
           container.appendChild(wrapper);
         }
