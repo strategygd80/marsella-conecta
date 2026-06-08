@@ -24,7 +24,6 @@
   .nav-back { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.82rem; }
   .nav-back:hover { color: #fff; }
 
-  /* PROGRESS */
   .progress-wrap { background: var(--surface); border-bottom: 1px solid var(--border); padding: 20px 24px; }
   .progress-steps { display: flex; align-items: center; gap: 0; max-width: 600px; margin: 0 auto; }
   .step { display: flex; align-items: center; gap: 8px; flex: 1; font-size: 0.75rem; font-weight: 600; color: var(--ink-muted); }
@@ -36,7 +35,6 @@
   .step.active .step-num { border-color: var(--accent); background: var(--accent); color: #fff; }
   .step.done .step-num { border-color: var(--accent2); background: var(--accent2); color: #fff; }
 
-  /* FORM LAYOUT */
   .form-shell { max-width: 640px; margin: 0 auto; padding: 32px 20px 60px; }
   .form-card { background: var(--surface); border-radius: 16px; border: 1.5px solid var(--border); padding: 32px; display: none; }
   .form-card.active { display: block; animation: slideIn 0.3s ease; }
@@ -51,12 +49,6 @@
   }
   .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); background: #fff; }
   .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-
-  /* PLANS */
-  .plan-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
-  .plan-option { display: none; }
-  .plan-label { display: block; padding: 16px; border-radius: 12px; border: 2px solid var(--border); cursor: pointer; text-align: center; }
-  .plan-option:checked + .plan-label { border-color: var(--accent); background: #fff5f3; }
 
   .btn-row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 28px; }
   .btn-prev { padding: 12px 22px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--surface); cursor: pointer; font-weight: 600; }
@@ -82,7 +74,7 @@
     <div class="field-row">
       <div class="field">
         <label>Categoría <span class="req">*</span></label>
-        <select id="f_cat"><option value="">Sincronizando con Google Sheet...</option></select>
+        <select id="f_cat"><option value="">Sincronizando validaciones...</option></select>
       </div>
       <div class="field">
         <label>Barrio / Zona <span class="req">*</span></label>
@@ -101,11 +93,11 @@
     </div>
     <div class="field">
       <label>Descripción del servicio</label>
-      <textarea id="f_desc" placeholder="Detalles de lo que ofreces..."></textarea>
+      <textarea id="f_desc" placeholder="Detalles de lo que vendes o realizas..."></textarea>
     </div>
 
     <div id="dynamic_sheet_columns" class="dynamic-section" style="display:none;">
-      <h4 style="font-family:'Syne',sans-serif; font-size:0.85rem; color:var(--accent2); margin-bottom:15px; text-transform:uppercase;">Nuevas Columnas Detectadas</h4>
+      <h4 style="font-family:'Syne',sans-serif; font-size:0.85rem; color:var(--accent2); margin-bottom:15px; text-transform:uppercase;">Campos Extra Detectados en Sheet 2</h4>
     </div>
 
     <div class="btn-row"><button class="btn-next" onclick="nextStep(1)">Continuar →</button></div>
@@ -119,25 +111,41 @@
   </div>
 
   <div class="form-card" id="card3">
-    <div class="plan-cards">
-      <div><input type="radio" name="plan" id="p_free" value="Gratis" checked><label for="p_free" class="plan-label">Gratis ($0)</label></div>
-      <div><input type="radio" name="plan" id="p_basic" value="Básico"><label for="p_basic" class="plan-label">Básico ($5)</label></div>
-      <div><input type="radio" name="plan" id="p_pro" value="Pro"><label for="p_pro" class="plan-label">Pro ($12)</label></div>
-    </div>
     <div class="btn-row"><button class="btn-prev" onclick="prevStep(3)">← Atrás</button><button class="btn-next" onclick="submitForm()">✓ Confirmar Registro</button></div>
   </div>
 
   <div class="success-card" id="successCard">
-    <h2>🎉 ¡Estructura Dinámica Mapeada!</h2>
-    <p>El comercio <strong id="out_name"></strong> se procesó cruzando los datos del esquema activo en la nube.</p>
+    <h2>🎉 Registration Data Pack Dispatched!</h2>
+    <p>The business entry <strong id="out_name"></strong> was securely structured using your spreadsheet data maps.</p>
   </div>
 </div>
 
 <script>
+const CONFIG_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/1uINJpiEzN17c596gQpxYUyw7emyocFZvyQdDriNPGJU/pub?gid=698284721&single=true&output=csv';
 const LIVE_SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT1uS_V8U8LpYv38E0v-H6_VwR8pM3D3g/pub?output=csv';
+
 let sheetHeaders = [];
 
 window.addEventListener('DOMContentLoaded', () => {
+  // 1. Pull dynamic category parameters straight from your official configuration grid
+  fetch(CONFIG_SHEET_URL)
+    .then(res => res.text())
+    .then(csv => {
+      const lines = csv.split('\n').filter(l => l.trim() !== '');
+      if(lines.length < 2) return;
+      
+      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+      const catIdx = headers.indexOf('Categoría');
+      
+      const categoryOptions = [];
+      for(let i = 1; i < lines.length; i++) {
+        const row = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+        if(row[catIdx]) categoryOptions.push(row[catIdx]);
+      }
+      buildDropdown(categoryOptions);
+    }).catch(() => buildDropdown(['Transporte', 'Comida', 'Tienda', 'Servicios']));
+
+  // 2. Automatically generate text boxes for any custom column header added to Sheet 2
   fetch(LIVE_SHEET_CSV)
     .then(res => res.text())
     .then(data => {
@@ -145,17 +153,6 @@ window.addEventListener('DOMContentLoaded', () => {
       if(lines.length === 0) return;
 
       sheetHeaders = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-      
-      const catIndex = sheetHeaders.indexOf('Categoría');
-      if(catIndex !== -1) {
-        const uniqueCategories = new Set();
-        for(let i = 1; i < lines.length; i++) {
-          const rowValues = lines[i].split(',');
-          if(rowValues[catIndex]) uniqueCategories.add(rowValues[catIndex].trim().replace(/"/g, ''));
-        }
-        buildDropdown(Array.from(uniqueCategories));
-      }
-
       const coreFields = ['Nombre', 'Categoría', 'Barrio', 'Teléfono', 'Descripción', 'Horario', 'DUI', 'Correo', 'Plan', 'Timestamp', 'Estado'];
       const container = document.getElementById('dynamic_sheet_columns');
 
@@ -166,17 +163,17 @@ window.addEventListener('DOMContentLoaded', () => {
           wrapper.className = 'field';
           wrapper.innerHTML = `
             <label>${col}</label>
-            <input type="text" class="dynamic-input" data-column="${col}" placeholder="Ingresa datos para ${col.toLowerCase()}">
+            <input type="text" class="dynamic-input" data-column="${col}" placeholder="Enter parameter parameters for ${col.toLowerCase()}">
           `;
           container.appendChild(wrapper);
         }
       });
-    }).catch(() => buildDropdown(['Comida', 'Servicios', 'Tienda']));
+    });
 });
 
 function buildDropdown(list) {
   const select = document.getElementById('f_cat');
-  select.innerHTML = '<option value="">Selecciona una opción...</option>';
+  select.innerHTML = '<option value="">Choose standard category category...</option>';
   list.forEach(item => {
     const opt = document.createElement('option');
     opt.value = item; opt.textContent = item;
@@ -195,6 +192,7 @@ function submitForm() {
   document.querySelectorAll('.dynamic-input').forEach(input => {
     payload[input.getAttribute('data-column')] = input.value;
   });
+  console.log("Dynamically compiled payload object logged:", payload);
   document.getElementById('card3').style.display = 'none';
   document.getElementById('out_name').textContent = payload.Nombre;
   document.getElementById('successCard').classList.add('active');
