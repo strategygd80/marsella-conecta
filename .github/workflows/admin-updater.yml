@@ -1,0 +1,27 @@
+name: Automated System Updates Config
+
+on:
+  repository_dispatch:
+    types: [admin_config_update]
+
+permissions:
+  contents: write
+
+jobs:
+  update-config:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository Source Code
+        uses: actions/checkout@v4
+
+      - name: Update Configuration JSON Matrix
+        run: |
+          echo '${{ github.event.client_payload.config_data }}' > config.json
+
+      - name: Commit and Push Updates Instantly to GitHub Pages
+        run: |
+          git config --global user.name "Marsella Admin Engine"
+          git config --global user.email "admin@marsellaconecta.com"
+          git add config.json
+          git commit -m "⚙️ Automated system setting adjustments from Admin Module" || echo "No structural changes to commit"
+          git push
