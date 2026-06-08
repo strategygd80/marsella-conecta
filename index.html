@@ -15,7 +15,7 @@
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); padding-bottom: 60px; }
 
   header { background: var(--ink); color: #fff; padding: 40px 24px; text-align: center; }
-  .logo { font-family: 'Syne', sans-serif; font-size: 2.3rem; font-weight: 800; }
+  .logo { font-family: 'Syne', sans-serif; font-size: 2.3rem; font-weight: 800; text-align: center; color: #fff; margin-bottom: 8px; }
   .logo span { color: var(--accent); }
 
   .nav-bar { display: flex; justify-content: center; gap: 15px; margin: -20px auto 30px; position: relative; z-index: 10; }
@@ -75,7 +75,7 @@
 const BUSINESS_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT1uS_V8U8LpYv38E0v-H6_VwR8pM3D3g/pub?output=csv';
 
 // URL 2: Your Categories and Visual Icons Layout Definition Tab (Gid: 698284721)
-const CONFIG_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/1uINJpiEzN17c596gQpxYUyw7emyocFZvyQdDriNPGJU/pub?gid=698284721&single=true&output=csv';
+const CONFIG_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT1uS_V8U8LpYv38E0v-H6_VwR8pM3D3g/pub?gid=698284721&single=true&output=csv';
 
 let categoryDatabase = {}; 
 let dataRecords = [];
@@ -96,8 +96,13 @@ function fetchCategorySchema() {
       if(lines.length < 2) return;
       
       const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-      const catIdx = headers.indexOf('Categoría');
-      const iconIdx = headers.indexOf('Icono_Codigo');
+      
+      // Smart header parsing index fallback matcher (looks for Spanish or English spelling variations)
+      let catIdx = headers.findIndex(h => h.toLowerCase().includes('cat'));
+      let iconIdx = headers.findIndex(h => h.toLowerCase().includes('icon'));
+
+      if(catIdx === -1) catIdx = 0;
+      if(iconIdx === -1) iconIdx = 2;
 
       const selectFilter = document.getElementById('catFilter');
 
@@ -107,7 +112,7 @@ function fetchCategorySchema() {
           const categoryName = row[catIdx];
           const iconCode = row[iconIdx] || 'briefcase'; 
           
-          categoryDatabase[categoryName.toLowerCase().trim()] = iconCode;
+          categoryDatabase[categoryName.toLowerCase().trim()] = iconCode.trim();
 
           const opt = document.createElement('option');
           opt.value = categoryName; opt.textContent = categoryName;
@@ -150,12 +155,17 @@ function renderDirectoryCards(dataset) {
   }
 
   dataset.forEach(biz => {
-    const name = biz['Nombre'] || 'Unnamed Local';
-    const rawCat = (biz['Categoría'] || '').trim();
-    const desc = biz['Descripción'] || 'No additional text details provided.';
-    const phone = biz['Teléfono'] || '';
+    // Dynamic matching loop looking for matching data points regardless of row position index
+    const nameKey = columnsPresent.find(c => c.toLowerCase().includes('nom')) || columnsPresent[0];
+    const catKey = columnsPresent.find(c => c.toLowerCase().includes('cat')) || columnsPresent[1];
+    const descKey = columnsPresent.find(c => c.toLowerCase().includes('desc')) || columnsPresent[4];
+    const telKey = columnsPresent.find(c => c.toLowerCase().includes('tel')) || columnsPresent[3];
 
-    // EXTRACT WEB GRAPHIC DESIGN DYNAMICALLY
+    const name = biz[nameKey] || 'Unnamed Local';
+    const rawCat = (biz[catKey] || '').trim();
+    const desc = biz[descKey] || 'No description available.';
+    const phone = biz[telKey] || '';
+
     const matchedIcon = categoryDatabase[rawCat.toLowerCase()] || 'briefcase';
 
     let card = `
@@ -174,10 +184,9 @@ function renderDirectoryCards(dataset) {
 
     columnsPresent.forEach(col => {
       const val = biz[col];
-      const blacklist = ['Nombre', 'Categoría', 'Descripción', 'Plan', 'Timestamp', 'Estado', 'DUI', 'Correo'];
+      const blacklist = [nameKey, catKey, descKey, 'plan', 'timestamp', 'estado', 'dui', 'correo', 'owner'];
       
-      // DISCARD STRUCTURAL CODES OR HOLES INSIDE SUBMISSIONS SPREADSHEETS
-      if(!val || val.trim() === '' || blacklist.includes(col)) return;
+      if(!val || val.trim() === '' || blacklist.some(b => col.toLowerCase().includes(b))) return;
 
       card += `
         <div class="meta-item">
@@ -199,7 +208,6 @@ function renderDirectoryCards(dataset) {
     grid.innerHTML += card;
   });
 
-  // Render SVG icons instantly onto interface components
   lucide.createIcons();
 }
 
@@ -208,9 +216,14 @@ function runFilters() {
   const cat = document.getElementById('catFilter').value;
 
   const match = dataRecords.filter(b => {
-    const n = (b['Nombre'] || '').toLowerCase();
-    const d = (b['Descripción'] || '').toLowerCase();
-    const c = b['Categoría'] || '';
+    const nameKey = columnsPresent.find(c => c.toLowerCase().includes('nom')) || columnsPresent[0];
+    const descKey = columnsPresent.find(c => c.toLowerCase().includes('desc')) || columnsPresent[4];
+    const catKey = columnsPresent.find(c => c.toLowerCase().includes('cat')) || columnsPresent[1];
+
+    const n = (b[nameKey] || '').toLowerCase();
+    const d = (b[descKey] || '').toLowerCase();
+    const c = b[catKey] || '';
+    
     return (n.includes(query) || d.includes(query)) && (cat === '' || c === cat);
   });
   renderDirectoryCards(match);
