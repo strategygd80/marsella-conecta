@@ -66,16 +66,16 @@
   </div>
 
   <div id="directoryGrid" class="grid">
-    <div class="no-results">Connecting master database configuration maps...</div>
+    <div class="no-results">Syncing master sheet tables and icons...</div>
   </div>
 </div>
 
 <script>
-// URL 1: Main Sheet Business Submissions Data (Sheet 2)
+// URL 1: Main Business Registry database submissions (Sheet 2)
 const BUSINESS_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT1uS_V8U8LpYv38E0v-H6_VwR8pM3D3g/pub?output=csv';
 
-// URL 2: Your Categories and Visual Icons Layout Definition Tab (Gid: 698284721)
-const CONFIG_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT1uS_V8U8LpYv38E0v-H6_VwR8pM3D3g/pub?gid=698284721&single=true&output=csv';
+// URL 2: Your Category Management & Icon Code Configuration database (Gid: 698284721)
+const CONFIG_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/1uINJpiEzN17c596gQpxYUyw7emyocFZvyQdDriNPGJU/pub?gid=698284721&single=true&output=csv';
 
 let categoryDatabase = {}; 
 let dataRecords = [];
@@ -96,13 +96,8 @@ function fetchCategorySchema() {
       if(lines.length < 2) return;
       
       const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-      
-      // Smart header parsing index fallback matcher (looks for Spanish or English spelling variations)
-      let catIdx = headers.findIndex(h => h.toLowerCase().includes('cat'));
-      let iconIdx = headers.findIndex(h => h.toLowerCase().includes('icon'));
-
-      if(catIdx === -1) catIdx = 0;
-      if(iconIdx === -1) iconIdx = 2;
+      const catIdx = headers.findIndex(h => h.toLowerCase().includes('cat'));
+      const iconIdx = headers.findIndex(h => h.toLowerCase().includes('icon'));
 
       const selectFilter = document.getElementById('catFilter');
 
@@ -150,22 +145,23 @@ function renderDirectoryCards(dataset) {
   grid.innerHTML = '';
 
   if(dataset.length === 0) {
-    grid.innerHTML = '<div class="no-results">No properties or locations match your filters.</div>';
+    grid.innerHTML = '<div class="no-results">No businesses match your filters.</div>';
     return;
   }
 
   dataset.forEach(biz => {
-    // Dynamic matching loop looking for matching data points regardless of row position index
-    const nameKey = columnsPresent.find(c => c.toLowerCase().includes('nom')) || columnsPresent[0];
-    const catKey = columnsPresent.find(c => c.toLowerCase().includes('cat')) || columnsPresent[1];
-    const descKey = columnsPresent.find(c => c.toLowerCase().includes('desc')) || columnsPresent[4];
-    const telKey = columnsPresent.find(c => c.toLowerCase().includes('tel')) || columnsPresent[3];
+    // Explicit exact keyword targeting mapped directly to your live Sheet 2 structural schema
+    const nameKey = columnsPresent.find(c => c.trim() === 'Nombre') || columnsPresent[0];
+    const catKey = columnsPresent.find(c => c.trim() === 'Categoría') || columnsPresent[1];
+    const descKey = columnsPresent.find(c => c.trim() === 'Descripción') || columnsPresent[4];
+    const telKey = columnsPresent.find(c => c.trim() === 'Teléfono') || columnsPresent[3];
 
-    const name = biz[nameKey] || 'Unnamed Local';
+    const name = biz[nameKey] || 'Negocio';
     const rawCat = (biz[catKey] || '').trim();
-    const desc = biz[descKey] || 'No description available.';
+    const desc = biz[descKey] || 'Sin descripción disponible por el momento.';
     const phone = biz[telKey] || '';
 
+    // Matches lowercase category rows straight to icon components
     const matchedIcon = categoryDatabase[rawCat.toLowerCase()] || 'briefcase';
 
     let card = `
@@ -182,11 +178,13 @@ function renderDirectoryCards(dataset) {
           <div class="meta-list">
     `;
 
+    // Loops automatically over newly discovered column additions
     columnsPresent.forEach(col => {
       const val = biz[col];
-      const blacklist = [nameKey, catKey, descKey, 'plan', 'timestamp', 'estado', 'dui', 'correo', 'owner'];
+      const blacklist = ['Nombre', 'Categoría', 'Descripción', 'Plan', 'Timestamp', 'Estado', 'DUI', 'Correo', 'Owner', 'Propietario'];
       
-      if(!val || val.trim() === '' || blacklist.some(b => col.toLowerCase().includes(b))) return;
+      // CRITICAL STRIPPER FILTER: Strips empty inputs and ignores management columns completely
+      if(!val || val.trim() === '' || blacklist.some(b => col.trim() === b)) return;
 
       card += `
         <div class="meta-item">
@@ -216,9 +214,9 @@ function runFilters() {
   const cat = document.getElementById('catFilter').value;
 
   const match = dataRecords.filter(b => {
-    const nameKey = columnsPresent.find(c => c.toLowerCase().includes('nom')) || columnsPresent[0];
-    const descKey = columnsPresent.find(c => c.toLowerCase().includes('desc')) || columnsPresent[4];
-    const catKey = columnsPresent.find(c => c.toLowerCase().includes('cat')) || columnsPresent[1];
+    const nameKey = columnsPresent.find(c => c.trim() === 'Nombre') || columnsPresent[0];
+    const descKey = columnsPresent.find(c => c.trim() === 'Descripción') || columnsPresent[4];
+    const catKey = columnsPresent.find(c => c.trim() === 'Categoría') || columnsPresent[1];
 
     const n = (b[nameKey] || '').toLowerCase();
     const d = (b[descKey] || '').toLowerCase();
