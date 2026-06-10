@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registrar Negocio — Marsella Conecta</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f2ec; --surface: #ffffff; --ink: #1a1714; --ink-muted: #7a7168;
+    --accent: #e8390e; --accent2: #2d6a4f; --gold: #c9a84c; --border: #e2ddd6;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); }
+
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--ink); color: #fff;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px; height: 56px;
+  }
+  .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.15rem; }
+  .nav-logo span { color: var(--accent); }
+  .nav-back { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.82rem; }
+  .nav-back:hover { color: #fff; }
+
+  /* PROGRESS BAR */
+  .progress-wrap { background: var(--surface); border-bottom: 1px solid var(--border); padding: 20px 24px; }
+  .progress-steps { display: flex; align-items: center; justify-content: space-between; max-width: 600px; margin: 0 auto; }
+  .step { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; font-weight: 600; color: var(--ink-muted); }
+  .step-num {
+    width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border);
+    display: grid; place-items: center; font-weight: 700; font-size: 0.78rem; transition: all 0.3s;
+  }
+  .step.active .step-num { border-color: var(--accent); background: var(--accent); color: #fff; }
+  .step.done .step-num { border-color: var(--accent2); background: var(--accent2); color: #fff; }
+  .step.active { color: var(--ink); }
+  .step-line { flex: 1; height: 2px; background: var(--border); margin: 0 12px; }
+  .step-line.done { background: var(--accent2); }
+
+  /* FORM LAYOUT */
+  .form-shell { max-width: 640px; margin: 0 auto; padding: 32px 20px 60px; }
+  .form-card {
+    background: var(--surface); border-radius: 16px; border: 1.5px solid var(--border); padding: 32px;
+    box-shadow: 0 4px 20px rgba(26,23,20,0.07); display: none;
+  }
+  .form-card.active { display: block; animation: slideIn 0.3s ease; }
+  @keyframes slideIn { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:translateX(0); } }
+
+  .card-eyebrow { font-size: 0.68rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+  .card-title { font-family: 'Syne', sans-serif; font-size: 1.35rem; font-weight: 800; margin-bottom: 6px; }
+  .card-sub { font-size: 0.85rem; color: var(--ink-muted); margin-bottom: 28px; }
+
+  .field { margin-bottom: 20px; }
+  .field label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; }
+  .field label .req { color: var(--accent); }
+  .field input, .field select, .field textarea {
+    width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; background: var(--bg); outline: none; transition: all 0.2s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); background: #fff; }
+  .field textarea { min-height: 90px; resize: vertical; }
+  .field .hint { font-size: 0.73rem; color: var(--ink-muted); margin-top: 5px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  /* PLAN CARDS */
+  .plan-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 4px; }
+  .plan-option { display: none; }
+  .plan-label {
+    display: block; padding: 16px; border-radius: 12px; border: 2px solid var(--border);
+    cursor: pointer; transition: all 0.2s; text-align: center; position: relative; height: 100%;
+  }
+  .plan-label:hover { border-color: var(--accent); }
+  .plan-option:checked + .plan-label { border-color: var(--accent); background: #fff5f3; }
+  .plan-badge {
+    position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
+    background: var(--gold); color: var(--ink); font-size: 0.6rem; font-weight: 800;
+    padding: 2px 8px; border-radius: 4px; white-space: nowrap;
+  }
+  .plan-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.95rem; margin-bottom: 4px; }
+  .plan-price { font-size: 1.3rem; font-weight: 700; color: var(--accent); }
+  .plan-price span { font-size: 0.7rem; color: var(--ink-muted); font-weight: 400; }
+  .plan-features { margin-top: 10px; font-size: 0.72rem; color: var(--ink-muted); line-height: 1.7; }
+
+  /* INTERACTION CONTROLS */
+  .btn-row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 28px; }
+  .btn-prev { padding: 12px 22px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--surface); color: var(--ink); font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+  .btn-prev:hover { border-color: var(--ink); }
+  .btn-next { padding: 12px 28px; border-radius: 10px; border: none; background: var(--accent); color: #fff; font-size: 0.88rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+  .btn-next:hover { opacity: 0.85; transform: translateY(-1px); }
+  .btn-next:disabled { background: var(--ink-muted); cursor: not-allowed; opacity: 0.6; }
+
+  /* STATE HANDLING (SUCCESS) */
+  .success-card { text-align: center; padding: 50px 32px; background: var(--surface); border-radius: 16px; border: 1.5px solid var(--border); display: none; }
+  .success-card.active { display: block; animation: slideIn 0.4s ease; }
+  .success-icon { font-size: 3.5rem; margin-bottom: 16px; }
+  .success-card h2 { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; margin-bottom: 10px; }
+  .success-card p { color: var(--ink-muted); font-size: 0.9rem; max-width: 400px; margin: 0 auto 24px; }
+  .success-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .success-actions a { padding: 11px 22px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; text-decoration: none; }
+  .success-actions .btn-primary { background: var(--accent); color: #fff; }
+  .success-actions .btn-secondary { border: 1.5px solid var(--border); color: var(--ink); background: var(--surface); }
+
+  .trust-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; justify-content: center; }
+  .trust-item { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--ink-muted); }
+
+  @media (max-width: 560px) { .form-card { padding: 22px 18px; } .field-row { grid-template-columns: 1fr; } .progress-steps span { display: none; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Marsella<span>Conecta</span></div>
+  <a href="index.html" class="nav-back">← Volver al directorio</a>
+</nav>
+
+<div class="progress-wrap" id="progressWrap">
+  <div class="progress-steps">
+    <div class="step active" id="step1-indicator"><div class="step-num">1</div><span>Negocio</span></div>
+    <div class="step-line" id="line1"></div>
+    <div class="step" id="step2-indicator"><div class="step-num">2</div><span>Propietario</span></div>
+    <div class="step-line" id="line2"></div>
+    <div class="step" id="step3-indicator"><div class="step-num">3</div><span>Plan</span></div>
+  </div>
+</div>
+
+<div class="form-shell">
+  <form id="registrationForm" onsubmit="event.preventDefault();">
+    
+    <div class="form-card active" id="card1">
+      <div class="card-eyebrow">Paso 1 de 3</div>
+      <div class="card-title">Información de tu negocio</div>
+      <div class="card-sub">Estos datos serán visibles públicamente en el directorio local.</div>
+
+      <div class="field">
+        <label>Nombre del negocio <span class="req">*</span></label>
+        <input type="text" id="f_nombre" required placeholder="Ej: Taxi VIP Marsella">
+      </div>
+      
+      <div class="field-row">
+        <div class="field">
+          <label>Categoría <span class="req">*</span></label>
+          <select id="f_cat" required>
+            <option value="">Seleccionar...</option>
+            <option value="Taxi">Taxi / Transporte</option>
+            <option value="Comida">Comida / Alimentación</option>
+            <option value="Bebidas">Bebidas</option>
+            <option value="Servicios Tecnicos">Servicios Técnicos / Hogar</option>
+            <option value="Belleza">Belleza y Estética</option>
+            <option value="Tienda">Tienda / Abarrotería</option>
+            <option value="Otros">Otros Servicios</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Barrio / Senda / Zona <span class="req">*</span></label>
+          <input type="text" id="f_barrio" required placeholder="Ej: Ciudad Marsella, Senda 4, Pol. H">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Teléfono de Contacto <span class="req">*</span></label>
+          <input type="tel" id="f_tel" required maxlength="9" placeholder="7123-4567">
+          <div class="hint">Prefijo (+503) nativo del sistema.</div>
+        </div>
+        <div class="field">
+          <label>Horario de atención</label>
+          <input type="text" id="f_horario" placeholder="Ej: Lun-Sab 7:00 AM - 5:00 PM">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Descripción del servicio u oferta</label>
+        <textarea id="f_desc" placeholder="Detalla los servicios, productos o zonas de entrega a domicilio que manejas..."></textarea>
+      </div>
+
+      <div class="btn-row">
+        <button type="button" class="btn-next" onclick="validateAndNext(1)">Continuar →</button>
+      </div>
+    </div>
+
+    <div class="form-card" id="card2">
+      <div class="card-eyebrow">Paso 2 de 3</div>
+      <div class="card-title">Datos privados de control</div>
+      <div class="card-sub">Esta información es confidencial. NO se publicará en la web externa.</div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Nombre del Propietario <span class="req">*</span></label>
+          <input type="text" id="f_owner" placeholder="Nombre completo del responsable">
+        </div>
+        <div class="field">
+          <label>Documento DUI (Opcional)</label>
+          <input type="text" id="f_dui" placeholder="00000000-0" maxlength="10">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Correo electrónico <span class="req">*</span></label>
+        <input type="email" id="f_email" placeholder="ejemplo@correo.com">
+      </div>
+
+      <div class="field">
+        <label>¿Cómo nos encontraste?</label>
+        <select id="f_source">
+          <option value="">Seleccionar...</option>
+          <option value="Facebook">Facebook</option>
+          <option value="Instagram">Instagram</option>
+          <option value="Referido">Referido por un vecino</option>
+          <option value="Flyer">Flyer / Volante impreso</option>
+          <option value="Google">Búsqueda en Google</option>
+          <option value="Otro">Otro medio</option>
+        </select>
+      </div>
+
+      <div class="btn-row">
+        <button type="button" class="btn-prev" onclick="goToStep(1)">← Atrás</button>
+        <button type="button" class="btn-next" onclick="validateAndNext(2)">Continuar →</button>
+      </div>
+    </div>
+
+    <div class="form-card" id="card3">
+      <div class="card-eyebrow">Paso 3 de 3</div>
+      <div class="card-title">Selección de plan comercial</div>
+      <div class="card-sub">Determina la exposición de tu listado dentro de Marsella Conecta.</div>
+
+      <div class="plan-cards">
+        <div>
+          <input type="radio" name="plan" id="plan_free" class="plan-option" value="Gratuito" checked>
+          <label for="plan_free" class="plan-label">
+            <div class="plan-name">Gratuito</div>
+            <div class="plan-price">$0<span>/mes</span></div>
+            <div class="plan-features">Ficha básica<br>Botón WhatsApp<br>Estatus Estándar</div>
+          </label>
+        </div>
+        <div style="position:relative">
+          <input type="radio" name="plan" id="plan_basic" class="plan-option" value="Básico">
+          <label for="plan_basic" class="plan-label">
+            <div class="plan-badge">POPULAR</div>
+            <div class="plan-name">Básico</div>
+            <div class="plan-price">$5<span>/mes</span></div>
+            <div class="plan-features">Badge Verificado<br>Ficha prioritaria<br>Soporte por chat</div>
+          </label>
+        </div>
+        <div>
+          <input type="radio" name="plan" id="plan_pro" class="plan-option" value="Pro">
+          <label for="plan_pro" class="plan-label">
+            <div class="plan-name">Destacado Pro</div>
+            <div class="plan-price">$12<span>/mes</span></div>
+            <div class="plan-features">Exposición en Home<br>Métricas mensuales<br>Soporte VIP</div>
+          </label>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button type="button" class="btn-prev" onclick="goToStep(2)">← Atrás</button>
+        <button type="button" class="btn-next" id="submitBtn" onclick="dispatchDirectToSheets()">✓ Finalizar e Inyectar Datos</button>
+      </div>
+    </div>
+  </form>
+
+  <div class="success-card" id="successCard">
+    <div class="success-icon">🚀</div>
+    <h2>¡Solicitud Recibida Correctamente!</h2>
+    <p>El establecimiento comercial <strong id="outBizName"></strong> fue registrado en nuestra cola de revisión interna bajo estatus protegido.</p>
+    <div class="success-actions">
+      <a href="index.html" class="btn-primary">Ir al Directorio</a>
+    </div>
+  </div>
+</div>
+
+<script>
+// BACKEND API CONNECTION ENDPOINT (DIRECT-TO-SHEETS API MACRO URL)
+const GOOGLE_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbxRB73Unw_j9TrL2bfTUcrQsPX7w22MwVvPSGTzs5SjgTndlPACgB-tOPJghc3vNe2z/exec';
+
+function createCryptoUserId() {
+  return 'USR-' + Math.floor(10000000 + Math.random() * 90000000);
+}
+
+function validateAndNext(step) {
+  if (step === 1) {
+    if (!document.getElementById('f_nombre').value.trim() || !document.getElementById('f_cat').value || !document.getElementById('f_barrio').value.trim() || !document.getElementById('f_tel').value.trim()) {
+      alert('Por favor, completa todos los campos mandatorios marcados con (*).');
+      return;
+    }
+    goToStep(2);
+  } else if (step === 2) {
+    if (!document.getElementById('f_owner').value.trim() || !document.getElementById('f_email').value.trim()) {
+      alert('Los datos del propietario y correo electrónico son requeridos para la verificación.');
+      return;
+    }
+    goToStep(3);
+  }
+}
+
+function goToStep(n) {
+  document.querySelectorAll('.form-card').forEach((card, i) => card.classList.toggle('active', i + 1 === n));
+  document.getElementById('step1-indicator').classList.toggle('active', n >= 1);
+  document.getElementById('step1-indicator').classList.toggle('done', n > 1);
+  document.getElementById('line1').classList.toggle('done', n > 1);
+  document.getElementById('step2-indicator').classList.toggle('active', n >= 2);
+  document.getElementById('step2-indicator').classList.toggle('done', n > 2);
+  document.getElementById('line2').classList.toggle('done', n > 2);
+  document.getElementById('step3-indicator').classList.toggle('active', n === 3);
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function dispatchDirectToSheets() {
+  const targetBtn = document.getElementById('submitBtn');
+  targetBtn.disabled = true;
+  targetBtn.textContent = 'Inyectando fila en base de datos...';
+
+  const businessName = document.getElementById('f_nombre').value.trim();
+  const selectedTier = document.querySelector('input[name="plan"]:checked')?.value || 'Gratuito';
+
+  // ASYNCHRONOUSLY GENERATING HIDDEN METADATA FIELDS (Estado and Usuarioid)
+  const systemUserId = createCryptoUserId();
+  const systemStatus = "Pendiente Validacion"; 
+  const currentTimestamp = new Date().toLocaleString("es-SV", {timeZone: "America/El_Salvador"});
+
+  // Payload exact structure sequence for the Rows array mapping
+  const datasetPayload = {
+    Fecha_Registro: currentTimestamp,
+    Nombre: businessName,
+    Categoría: document.getElementById('f_cat').value,
+    Barrio: document.getElementById('f_barrio').value,
+    Teléfono: document.getElementById('f_tel').value.trim(),
+    Descripción: document.getElementById('f_desc').value || 'Sin descripción',
+    Estado: systemStatus,
+    Horario: document.getElementById('f_horario').value || 'No especificado',
+    Origen: document.getElementById('f_source').value || 'No especificado',
+    Plan: selectedTier,
+    Propietario: document.getElementById('f_owner').value,
+    DUI: document.getElementById('f_dui').value || 'No provisto',
+    Email: document.getElementById('f_email').value,
+    Usuarioid: systemUserId
+  };
+
+  fetch(GOOGLE_SCRIPT_API_URL, {
+    method: 'POST',
+    mode: 'no-cors', 
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(datasetPayload)
+  })
+  .then(() => executionSuccessCleanUp(businessName))
+  .catch(err => {
+    console.error('Direct connection failure:', err);
+    alert('Error de red al registrar directo en Sheets. Verifique la configuración macro.');
+    targetBtn.disabled = false;
+    targetBtn.textContent = '✓ Finalizar e Inyectar Datos';
+  });
+}
+
+function executionSuccessCleanUp(name) {
+  document.getElementById('registrationForm').style.display = 'none';
+  document.getElementById('progressWrap').style.display = 'none';
+  document.getElementById('outBizName').textContent = name;
+  document.getElementById('successCard').classList.add('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+</script>
+</body>
+</html>
