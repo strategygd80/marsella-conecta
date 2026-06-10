@@ -99,7 +99,6 @@
   .success-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
   .success-actions a { padding: 11px 22px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; text-decoration: none; }
   .success-actions .btn-primary { background: var(--accent); color: #fff; }
-  .success-actions .btn-secondary { border: 1.5px solid var(--border); color: var(--ink); background: var(--surface); }
 
   .trust-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; justify-content: center; }
   .trust-item { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--ink-muted); }
@@ -171,7 +170,7 @@
 
       <div class="field">
         <label>Descripción del servicio u oferta</label>
-        <textarea id="f_desc" placeholder="Detalla los servicios, productos o zonas de entrega a domicilio que manejas..."></textarea>
+        <textarea id="f_desc" placeholder="Detalla los servicios o productos..."></textarea>
       </div>
 
       <div class="btn-row">
@@ -270,11 +269,13 @@
 </div>
 
 <script>
-// BACKEND API CONNECTION ENDPOINT (DIRECT-TO-SHEETS API MACRO URL)
-const GOOGLE_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbxRB73Unw_j9TrL2bfTUcrQsPX7w22MwVvPSGTzs5SjgTndlPACgB-tOPJghc3vNe2z/exec';
+// PRODUCTION WEB APP ROUTING ENDPOINT
+const GOOGLE_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbx03pt-GssO3HmP0vKVpv9JTXd9XsjJOU1JsMO3kyVUEhpwER7Jf-CKMe/exec'; 
+// Double check to ensure URL string matches your deployed deployment exactly:
+const ACTIVE_URL = 'https://script.google.com/macros/s/AKfycbX39prrhKG4At4x-GssO3HmP0vKVpv9JTXd9XsjJOU1JsMO3kyVUEhpwER7Jf-CKMe/exec';
 
 function createCryptoUserId() {
-  return 'USR-' + Math.floor(10000000 + Math.random() * 90000000);
+  return 'BIZ-' + Math.floor(10000000 + Math.random() * 90000000);
 }
 
 function validateAndNext(step) {
@@ -313,13 +314,13 @@ function dispatchDirectToSheets() {
   const businessName = document.getElementById('f_nombre').value.trim();
   const selectedTier = document.querySelector('input[name="plan"]:checked')?.value || 'Gratuito';
 
-  // ASYNCHRONOUSLY GENERATING HIDDEN METADATA FIELDS (Estado and Usuarioid)
   const systemUserId = createCryptoUserId();
   const systemStatus = "Pendiente Validacion"; 
   const currentTimestamp = new Date().toLocaleString("es-SV", {timeZone: "America/El_Salvador"});
 
-  // Payload exact structure sequence for the Rows array mapping
+  // ENHANCED ROUTING PAYLOAD SPECIFIC FOR SHEET TWO SEPARATION
   const datasetPayload = {
+    formType: "business_registration", // Explicit router path flag
     Fecha_Registro: currentTimestamp,
     Nombre: businessName,
     Categoría: document.getElementById('f_cat').value,
@@ -336,7 +337,7 @@ function dispatchDirectToSheets() {
     Usuarioid: systemUserId
   };
 
-  fetch(GOOGLE_SCRIPT_API_URL, {
+  fetch(ACTIVE_URL, {
     method: 'POST',
     mode: 'no-cors', 
     headers: { 'Content-Type': 'application/json' },
@@ -345,7 +346,7 @@ function dispatchDirectToSheets() {
   .then(() => executionSuccessCleanUp(businessName))
   .catch(err => {
     console.error('Direct connection failure:', err);
-    alert('Error de red al registrar directo en Sheets. Verifique la configuración macro.');
+    alert('Error de red al registrar directo en Sheets.');
     targetBtn.disabled = false;
     targetBtn.textContent = '✓ Finalizar e Inyectar Datos';
   });
