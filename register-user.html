@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro de Vecinos — Marsella Conecta</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f2ec; --surface: #ffffff; --ink: #1a1714; --ink-muted: #7a7168;
+    --accent: #e8390e; --accent2: #2d6a4f; --border: #e2ddd6;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); }
+
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--ink); color: #fff;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px; height: 56px;
+  }
+  .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.15rem; }
+  .nav-logo span { color: var(--accent); }
+  .nav-back { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.82rem; }
+  .nav-back:hover { color: #fff; }
+
+  /* PROGRESS BAR */
+  .progress-wrap { background: var(--surface); border-bottom: 1px solid var(--border); padding: 20px 24px; }
+  .progress-steps { display: flex; align-items: center; justify-content: space-between; max-width: 500px; margin: 0 auto; }
+  .step { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; font-weight: 600; color: var(--ink-muted); }
+  .step-num {
+    width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border);
+    display: grid; place-items: center; font-weight: 700; font-size: 0.78rem; transition: all 0.3s;
+  }
+  .step.active .step-num { border-color: var(--accent); background: var(--accent); color: #fff; }
+  .step.done .step-num { border-color: var(--accent2); background: var(--accent2); color: #fff; }
+  .step.active { color: var(--ink); }
+  .step-line { flex: 1; height: 2px; background: var(--border); margin: 0 12px; }
+  .step-line.done { background: var(--accent2); }
+
+  /* FORM LAYOUT */
+  .form-shell { max-width: 540px; margin: 0 auto; padding: 32px 20px 60px; }
+  .form-card {
+    background: var(--surface); border-radius: 16px; border: 1.5px solid var(--border); padding: 32px;
+    box-shadow: 0 4px 20px rgba(26,23,20,0.07); display: none;
+  }
+  .form-card.active { display: block; animation: slideIn 0.3s ease; }
+  @keyframes slideIn { from { opacity:0; transform:translateX(10px); } to { opacity:1; transform:translateX(0); } }
+
+  .card-eyebrow { font-size: 0.68rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+  .card-title { font-family: 'Syne', sans-serif; font-size: 1.35rem; font-weight: 800; margin-bottom: 6px; }
+  .card-sub { font-size: 0.85rem; color: var(--ink-muted); margin-bottom: 28px; }
+
+  .field { margin-bottom: 20px; }
+  .field label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; }
+  .field label .req { color: var(--accent); }
+  .field input, .field select {
+    width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; background: var(--bg); outline: none; transition: all 0.2s;
+  }
+  .field input:focus, .field select:focus { border-color: var(--accent); background: #fff; }
+  .field .hint { font-size: 0.73rem; color: var(--ink-muted); margin-top: 5px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  /* INTERACTION CONTROLS */
+  .btn-row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 28px; }
+  .btn-prev { padding: 12px 22px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--surface); color: var(--ink); font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+  .btn-prev:hover { border-color: var(--ink); }
+  .btn-next { padding: 12px 28px; border-radius: 10px; border: none; background: var(--accent); color: #fff; font-size: 0.88rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+  .btn-next:hover { opacity: 0.85; transform: translateY(-1px); }
+  .btn-next:disabled { background: var(--ink-muted); cursor: not-allowed; opacity: 0.6; }
+
+  /* SUCCESS CARD */
+  .success-card { text-align: center; padding: 50px 32px; background: var(--surface); border-radius: 16px; border: 1.5px solid var(--border); display: none; }
+  .success-card.active { display: block; animation: slideIn 0.4s ease; }
+  .success-icon { font-size: 3.5rem; margin-bottom: 16px; }
+  .success-card h2 { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; margin-bottom: 10px; }
+  .success-card p { color: var(--ink-muted); font-size: 0.9rem; max-width: 400px; margin: 0 auto 24px; }
+  .success-actions { display: flex; gap: 10px; justify-content: center; }
+  .success-actions a { padding: 11px 22px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; text-decoration: none; background: var(--accent); color: #fff; }
+
+  @media (max-width: 500px) { .form-card { padding: 22px 18px; } .field-row { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Marsella<span>Conecta</span></div>
+  <a href="index.html" class="nav-back">← Ir al directorio</a>
+</nav>
+
+<div class="progress-wrap" id="progressWrap">
+  <div class="progress-steps">
+    <div class="step active" id="step1-indicator"><div class="step-num">1</div><span>Datos Personales</span></div>
+    <div class="step-line" id="line1"></div>
+    <div class="step" id="step2-indicator"><div class="step-num">2</div><span>Ubicación y Contacto</span></div>
+  </div>
+</div>
+
+<div class="form-shell">
+  <form id="neighborForm" onsubmit="event.preventDefault();">
+    
+    <div class="form-card active" id="card1">
+      <div class="card-eyebrow">Paso 1 de 2</div>
+      <div class="card-title">Únete como Vecino</div>
+      <div class="card-sub">Crea tu perfil comunitario para conectar con los servicios de tu colonia.</div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Nombre <span class="req">*</span></label>
+          <input type="text" id="f_nombre" required placeholder="Tu primer nombre">
+        </div>
+        <div class="field">
+          <label>Apellido <span class="req">*</span></label>
+          <input type="text" id="f_apellido" required placeholder="Tus apellidos">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Correo Electrónico <span class="req">*</span></label>
+        <input type="email" id="f_email" required placeholder="ejemplo@correo.com">
+        <div class="hint">Usado estrictamente para avisos importantes de la comunidad.</div>
+      </div>
+
+      <div class="btn-row">
+        <button type="button" class="btn-next" onclick="validateAndNext(1)">Continuar →</button>
+      </div>
+    </div>
+
+    <div class="form-card" id="card2">
+      <div class="card-eyebrow">Paso 2 de 2</div>
+      <div class="card-title">Ubicación y Contacto</div>
+      <div class="card-sub">Establece tus canales de comunicación locales.</div>
+
+      <div class="field">
+        <label>Número de WhatsApp <span class="req">*</span></label>
+        <input type="tel" id="f_whatsapp" required maxlength="9" placeholder="7123-4567">
+        <div class="hint">Ingresa los 8 dígitos de tu número local de El Salvador.</div>
+      </div>
+
+      <div class="field">
+        <label>Quartier (Senda / Etapa / Zona) <span class="req">*</span></label>
+        <input type="text" id="f_quartier" required placeholder="Ej: Senda 4, Polígono H, Etapa 2">
+      </div>
+
+      <div class="field">
+        <label>¿Dónde nos encontraste? <span class="req">*</span></label>
+        <select id="f_source" required>
+          <option value="">Seleccionar...</option>
+          <option value="Facebook">Facebook</option>
+          <option value="Instagram">Instagram</option>
+          <option value="Referido">Referido por un vecino</option>
+          <option value="Flyer">Flyer / Volante impreso</option>
+          <option value="Google">Búsqueda en Google</option>
+          <option value="Otro">Otro medio</option>
+        </select>
+      </div>
+
+      <div class="btn-row">
+        <button type="button" class="btn-prev" onclick="goToStep(1)">← Atrás</button>
+        <button type="button" class="btn-next" id="submitBtn" onclick="dispatchNeighborToSheets()">✓ Completar mi Registro</button>
+      </div>
+    </div>
+  </form>
+
+  <div class="success-card" id="successCard">
+    <div class="success-icon">🏡</div>
+    <h2>¡Registro de Vecino Exitoso!</h2>
+    <p>Bienvenido a la red, <strong id="outNeighborName"></strong>. Tu perfil comunitario ha sido guardado de manera segura.</p>
+    <div class="success-actions">
+      <a href="index.html">Explorar el Directorio Local</a>
+    </div>
+  </div>
+</div>
+
+<script>
+// PRODUCTION ENDPOINT FOR DIRECT SHEET CONNECTIONS
+const GOOGLE_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbwX39prrhKG4At4x-GssO3HmP0vKVpv9JTXd9XsjJOU1JsMO3kyVUEhpwER7Jf-CKMe/exec';
+
+function generateNeighborId() {
+  return 'USR-' + Math.floor(10000000 + Math.random() * 90000000);
+}
+
+function validateAndNext(step) {
+  if (step === 1) {
+    if (!document.getElementById('f_nombre').value.trim() || !document.getElementById('f_apellido').value.trim() || !document.getElementById('f_email').value.trim()) {
+      alert('Por favor completa todos los campos obligatorios del perfil.');
+      return;
+    }
+    goToStep(2);
+  }
+}
+
+function goToStep(n) {
+  document.querySelectorAll('.form-card').forEach((card, i) => card.classList.toggle('active', i + 1 === n));
+  document.getElementById('step1-indicator').classList.toggle('active', n >= 1);
+  document.getElementById('step1-indicator').classList.toggle('done', n > 1);
+  document.getElementById('line1').classList.toggle('done', n > 1);
+  document.getElementById('step2-indicator').classList.toggle('active', n === 2);
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function dispatchNeighborToSheets() {
+  const targetBtn = document.getElementById('submitBtn');
+  
+  if (!document.getElementById('f_whatsapp').value.trim() || !document.getElementById('f_quartier').value.trim() || !document.getElementById('f_source').value) {
+    alert('Por favor completa los detalles de ubicación y contacto.');
+    return;
+  }
+
+  targetBtn.disabled = true;
+  targetBtn.textContent = 'Guardando perfil de vecino...';
+
+  const neighborFirst = document.getElementById('f_nombre').value.trim();
+  const neighborLast = document.getElementById('f_apellido').value.trim();
+
+  // SECURE METADATA COMPILATION
+  const generatedId = generateNeighborId();
+  const defaultStatus = "Pendiente"; // Matches standard initial user state flags
+
+  // PAYLOAD SCHEMATICS COMPILING STRINGS WITH SPACES MATCHING SPREADSHEET HEADERS
+  const neighborPayload = {
+    formType: "neighbor_registration",
+    "Nombre": neighborFirst,
+    "Apellido": neighborLast,
+    "Correo Electronico": document.getElementById('f_email').value.trim(),
+    "Numero Whatsapp": document.getElementById('f_whatsapp').value.trim(),
+    "Quartier": document.getElementById('f_quartier').value.trim(),
+    "Donde nos encontraste": document.getElementById('f_source').value,
+    "Estado": defaultStatus,
+    "Usarioid": generatedId
+  };
+
+  fetch(GOOGLE_SCRIPT_API_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(neighborPayload)
+  })
+  .then(() => {
+    document.getElementById('neighborForm').style.display = 'none';
+    document.getElementById('progressWrap').style.display = 'none';
+    document.getElementById('outNeighborName').textContent = neighborFirst;
+    document.getElementById('successCard').classList.add('active');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  })
+  .catch(err => {
+    console.error('API Pipeline Interruption:', err);
+    alert('Error al conectar con la base de datos central. Inténtalo de nuevo.');
+    targetBtn.disabled = false;
+    targetBtn.textContent = '✓ Completar mi Registro';
+  });
+}
+</script>
+</body>
+</html>
