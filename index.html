@@ -48,7 +48,7 @@
   }
   .btn-join-nav:hover { background: rgba(255,255,255,0.1); border-color: #fff; }
 
-  /* NEW CONTEXT-AWARE PROFILE BUTTON */
+  /* CONTEXT-AWARE PROFILE BUTTON */
   .profile-badge-nav {
     background: #2d2420; color: #fff; border: 1.5px solid var(--border);
     padding: 6px 14px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
@@ -120,7 +120,7 @@
   .pill:hover { border-color: var(--accent); color: var(--accent); }
   .pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-  /* LISTINGS & HOMEPAGE VISUAL SECTIONS */
+  /* LISTINGS & HOMEPAGE SECTIONS */
   .listings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
   .results-count { font-size: 0.82rem; color: var(--ink-muted); }
   .sort-select { font-family: 'DM Sans', sans-serif; font-size: 0.8rem; border: 1.5px solid var(--border); border-radius: 8px; padding: 6px 10px; background: var(--surface); cursor: pointer; outline: none; }
@@ -197,6 +197,14 @@
   .modal-row-split { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .modal-switch-text { font-size: 0.82rem; margin-top: 14px; color: var(--ink-muted); }
   .modal-switch-text span { color: var(--accent); cursor: pointer; text-decoration: underline; font-weight: 600; }
+  
+  /* PREMIUM PREVENTIVE DESTRUCTIVE LOGOUT LINK STYLING */
+  .btn-logout-modal {
+    background: none; border: none; color: #cc0000; font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem; font-weight: 700; text-decoration: underline; cursor: pointer;
+    margin-top: 18px; display: inline-block; transition: opacity 0.15s;
+  }
+  .btn-logout-modal:hover { opacity: 0.75; }
 
   .empty-state { text-align: center; padding: 60px 20px; color: var(--ink-muted); }
   .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
@@ -339,12 +347,15 @@
     
     <button class="mc-modal-cta" id="editProfileSubmitBtn" onclick="dispatchProfileOverwrites()">✓ Guardar Cambios</button>
     <button class="mc-modal-close" onclick="closeProfileEditModal()">Cerrar sin guardar</button>
+    
+    <div>
+      <button class="btn-logout-modal" onclick="executeNavbarSessionLogout()">🔴 Cerrar mi Sesión Comunitaria</button>
+    </div>
   </div>
 </div>
 
 <script>
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRtiBEyirRS73NI23sRAllDT7g3aphl5uYmhDIRHKhzwjYDZD8c0YmNv19WfkBgHXZxTLlS5HnROUOz/pub?gid=0&single=true&output=csv';
-// PUBLISHED TARGET FOR USARIO (VECINOS) TAB DATABASE LOOKUPS
 const USER_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRtiBEyirRS73NI23sRAllDT7g3aphl5uYmhDIRHKhzwjYDZD8c0YmNv19WfkBgHXZxTLlS5HnROUOz/pub?gid=488734005&single=true&output=csv';
 const GOOGLE_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbyvDoqy9S9kIm9CUbHRppPQ_AFH8D7gfilV1F9nLgkdwEuM9Zl1NuwiFSFy8dfir0VZ/exec';
 const COUNTRY_CODE = '503';
@@ -387,7 +398,6 @@ function logUserEvent(eventType, searchVal = '', bizName = '') {
   }).catch(err => console.warn("Analytics logger tracking timeout:", err));
 }
 
-// CONTEXT-AWARE SYSTEM NAVIGATION ENGINE
 function evaluateUserSession() {
   const verifiedToken = localStorage.getItem('mc_user_id');
   const userNameToken = localStorage.getItem('mc_user_name');
@@ -400,7 +410,6 @@ function evaluateUserSession() {
   const footerBizElements = document.querySelectorAll('.biz-hide-element');
 
   if (!verifiedToken) {
-    // VISITOR LAYER MODE: Restore all general standard elements
     if (navJoinBtn) navJoinBtn.style.display = 'block';
     if (navMerchantCta) navMerchantCta.style.display = 'block';
     if (navPublicLinks) navPublicLinks.style.display = 'flex';
@@ -408,18 +417,25 @@ function evaluateUserSession() {
     if (profileBadge) profileBadge.style.display = 'none';
     footerBizElements.forEach(el => el.style.display = 'inline');
   } else {
-    // CONTEXT-AWARE MASKING LAYER: Shield user from everything commercial
     if (navJoinBtn) navJoinBtn.style.display = 'none';
     if (navMerchantCta) navMerchantCta.style.display = 'none';
     if (navPublicLinks) navPublicLinks.style.display = 'none'; 
     if (bottomBanner) bottomBanner.style.display = 'none';
     
-    // Activate profile widget overlay
     if (profileBadge) {
       profileBadge.textContent = `👤 Hola, ${userNameToken || 'Vecino'}`;
       profileBadge.style.display = 'block';
     }
     footerBizElements.forEach(el => el.style.display = 'none');
+  }
+}
+
+// MASTER TERMINATION ROUTINE: Clears storage memory and resets layout boundaries
+function executeNavbarSessionLogout() {
+  if (confirm('¿Estás seguro de que deseas cerrar tu sesión en Marsella Conecta?')) {
+    logUserEvent('Cierre_Sesion', '', localStorage.getItem('mc_user_id') || '');
+    localStorage.clear();
+    window.location.reload(); // Hard reloads directory state immediately
   }
 }
 
@@ -430,9 +446,9 @@ function switchToLoginLayout() {
   closeAuthModal();
   document.getElementById('userLoginModal').classList.add('active');
 }
+if (cols[2] === emailInput && cols[8] === passwordInput) {
 function closeLoginModal() { document.getElementById('userLoginModal').classList.remove('active'); }
 
-// DECOUPLED ASYNCHRONOUS SECURITY LOOKUP ENGINE
 async function executeNeighborLogin() {
   const emailInput = document.getElementById('log_email').value.trim().toLowerCase();
   const passwordInput = document.getElementById('log_password').value;
@@ -454,7 +470,6 @@ async function executeNeighborLogin() {
     const lines = text.trim().split('\n');
     let accessGranted = false;
 
-    // Parses raw text data string to run credentials validation
     for (let i = 1; i < lines.length; i++) {
       const cols = parseCSVLine(lines[i]);
       if (cols.length < 5) continue;
@@ -466,7 +481,6 @@ async function executeNeighborLogin() {
       const registeredId = (cols[7] || '').trim().replace(/^"|"$/g,'');
 
       if (registeredEmail === emailInput && registeredPass === passwordInput) {
-        // Authenticated: Write properties to local storage memory
         localStorage.setItem('mc_user_id', registeredId);
         localStorage.setItem('mc_user_name', registeredName);
         localStorage.setItem('mc_user_zone', registeredZone);
@@ -495,7 +509,6 @@ async function executeNeighborLogin() {
   }
 }
 
-// ASYNCHRONOUS PASSWORD RECOVERY ENGINE BASELINE
 function executePasswordRecoveryRequest() {
   const emailInput = document.getElementById('log_email').value.trim();
   if(!emailInput) {
@@ -506,9 +519,7 @@ function executePasswordRecoveryRequest() {
   logUserEvent('Solicitud_Recuperacion_Clave', emailInput, '');
 }
 
-// PROFILE EDITING UTILITY PORTAL
 async function openProfileEditModal() {
-  // Pre-populates the input elements using live memory tokens
   document.getElementById('edit_nombre').value = localStorage.getItem('mc_user_name') || '';
   document.getElementById('edit_apellido').value = localStorage.getItem('mc_user_lastname_saved') || '';
   document.getElementById('edit_email').value = localStorage.getItem('mc_user_email_saved') || '';
@@ -537,7 +548,6 @@ function dispatchProfileOverwrites() {
   saveBtn.disabled = true;
   saveBtn.textContent = 'Guardando cambios en base de datos...';
 
-  // Pull existing structural keys to enforce exact cell row overwrite targeting
   const currentUserId = localStorage.getItem('mc_user_id');
 
   const updatePayload = {
@@ -548,7 +558,7 @@ function dispatchProfileOverwrites() {
     "Numero Whatsapp": whatsapp || 'No cambiado',
     Quartier: quartier,
     Usarioid: currentUserId,
-    Clave: password || '' // Blank field parameter tells your macro script to retain the original password cell
+    Clave: password || '' 
   };
 
   fetch(GOOGLE_SCRIPT_API_URL, {
@@ -558,7 +568,6 @@ function dispatchProfileOverwrites() {
     body: JSON.stringify(updatePayload)
   });
 
-  // Synchronously update front-end parameters immediately to stop latency loops
   localStorage.setItem('mc_user_name', nombre);
   localStorage.setItem('mc_user_zone', quartier);
   localStorage.setItem('mc_user_email_saved', email);
@@ -775,31 +784,6 @@ function renderCards() {
   } else {
     grid.innerHTML = sorted.map((item, idx) => generateCardHtml(item, idx)).join('');
   }
-}
-
-function shareBiz(name, tel) {
-  logUserEvent('Click_Compartir', '', name);
-  if (navigator.share) {
-    navigator.share({ title: name, text: `Encuentra ${name} en Marsella Conecta`, url: window.location.href });
-  } else {
-    navigator.clipboard.writeText(`${name} — Tel: +${COUNTRY_CODE}${tel} | Marsella Conecta`);
-    alert('¡Copiado al portapapeles!');
-  }
-}
-
-async function loadData() {
-  try {
-    const res = await fetch(SHEET_CSV_URL + '&cb=' + new Date().getTime());
-    if (!res.ok) throw new Error('fetch failed');
-    const text = await res.text();
-    const parsed = parseCSV(text);
-    allData = parsed.length ? parsed : SAMPLE_DATA;
-  } catch(e) {
-    console.warn('Using sample data:', e);
-    allData = SAMPLE_DATA;
-  }
-  filtered = [...allData];
-  renderStats(); renderCategories(); renderPills(); renderCards();
 }
 
 document.addEventListener('click', function(e) {
