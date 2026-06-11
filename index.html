@@ -684,7 +684,7 @@ function applyFilters() {
       getField(r,'Barrio'),
       getField(r,'Descripción'),
       getField(r,'Horario'),
-      getField(r,'Servicio Otro')
+      getField(rpx,'Servicio Otro')
     ].join(' ').toLowerCase();
     
     let implicitMatch = false;
@@ -719,7 +719,7 @@ function generateCardHtml(r, index) {
     isVerified ? '<span class="badge badge-verified">✓ Activo</span>' : '',
     isFeatured ? '<span class="badge badge-featured">⭐ Destacado</span>' : '',
   ].filter(Boolean).join('');
-  const starsHtml = stars ? '★'.repeat(Math.round(stars)) + '::star-empty::'.repeat(5-Math.round(stars)) : ''; // fixed icon string typo placeholder fallback fallback
+  const starsHtml = stars ? '★'.repeat(Math.round(stars)) + '☆'.repeat(5-Math.round(stars)) : '';
 
   return `<div class="biz-card" data-name="${name}" style="animation-delay:${index*0.03}s">
     <div class="biz-header">
