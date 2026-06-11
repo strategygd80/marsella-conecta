@@ -355,6 +355,7 @@
 <script>
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRtiBEyirRS73NI23sRAllDT7g3aphl5uYmhDIRHKhzwjYDZD8c0YmNv19WfkBgHXZxTLlS5HnROUOz/pub?gid=698284721&single=true&output=csv';
 const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSe4JJwwYb6aTW-XiAerbsheCKXpQ6PlOEBNMnR9Jzsn44uG4g/viewform?usp=header';
+const GOOGLE_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbyvDoqy9S9kIm9CUbHRppPQ_AFH8D7gfilV1F9nLgkdwEuM9Zl1NuwiFSFy8dfir0VZ/exec';
 const COUNTRY_CODE = '503';
 
 const CATEGORY_ICONS = {
@@ -375,6 +376,30 @@ const SAMPLE_DATA = [
 let allData = [];
 let filtered = [];
 let activeFilter = 'Todos';
+let searchDebounceTimer = null;
+
+// SERVERLESS REAL-TIME EVENT ANALYTICS ENGINE
+function logUserEvent(eventType, searchVal = '', bizName = '') {
+  const activeSessionId = localStorage.getItem('mc_user_id') || 'Anonimo';
+  const currentTimestamp = new Date().toLocaleString("es-SV", {timeZone: "America/El_Salvador"});
+  
+  const analyticalPayload = {
+    formType: "user_event_log",
+    Fecha: currentTimestamp,
+    Usuarioid: activeSessionId,
+    Evento_Tipo: eventType,
+    Valor_Busqueda: searchVal,
+    Negocio_Nombre: bizName
+  };
+
+  // Safe non-blocking asynchronous transmission
+  fetch(GOOGLE_SCRIPT_API_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(analyticalPayload)
+  }).catch(err => console.warn("Behavior analytics pipe congestion:", err));
+}
 
 // USER SESSION VALIDATION MIDDLEWARE
 function evaluateUserSession() {
@@ -433,11 +458,9 @@ function parseCSVLine(line) {
 }
 
 function getField(row, field) {
-  // Try exact, then normalized
   if (row[field] !== undefined) return row[field];
   const n = normalizeKey(field);
   if (row[n] !== undefined) return row[n];
-  // fuzzy: first key containing field letters
   const fl = field.toLowerCase().replace(/[^a-z]/g,'');
   for (const k of Object.keys(row)) {
     if (k.toLowerCase().replace(/[^a-z]/g,'').includes(fl)) return row[k];
@@ -479,15 +502,27 @@ function renderPills() {
 function setFilter(cat) {
   activeFilter = cat;
   renderCategories(); renderPills();
+  logUserEvent('Filtrado_Categoria', '', cat);
   applyFilters();
 }
 
 function doSearch() {
+  const query = document.getElementById('searchInput').value.trim();
+  if(query) logUserEvent('Click_Boton_Busqueda', query, '');
   applyFilters();
 }
 
 function applyFilters() {
   const q = (document.getElementById('searchInput').value||'').toLowerCase();
+  
+  // Real-time keystroke tracking with stabilized input debounce execution window
+  clearTimeout(searchDebounceTimer);
+  if (q.trim().length > 2) {
+    searchDebounceTimer = setTimeout(() => {
+      logUserEvent('Busqueda_Palabra', q.trim(), '');
+    }, 1200);
+  }
+
   filtered = allData.filter(r => {
     const matchCat = activeFilter === 'Todos' || getField(r,'Categoría') === activeFilter;
     if (!q) return matchCat;
@@ -536,7 +571,7 @@ function renderCards() {
     ].filter(Boolean).join('');
     const starsHtml = stars ? '★'.repeat(Math.round(stars)) + '☆'.repeat(5-Math.round(stars)) : '';
 
-    return `<div class="biz-card" style="animation-delay:${i*0.04}s">
+    return `<div class="biz-card" data-name="${name}" style="animation-delay:${i*0.04}s">
       <div class="biz-header">
         <div class="biz-avatar">${icon}</div>
         <div class="biz-meta">
@@ -558,6 +593,7 @@ function renderCards() {
 }
 
 function shareBiz(name, tel) {
+  logUserEvent('Click_Compartir', '', name);
   if (navigator.share) {
     navigator.share({ title: name, text: `Encuentra ${name} en Marsella Conecta`, url: window.location.href });
   } else {
@@ -581,15 +617,22 @@ async function loadData() {
   renderStats(); renderCategories(); renderPills(); renderCards();
 }
 
-// GLOBAL EVENT DELEGATION CAPTURING ACTION INTERCEPTIONS FOR UNREGISTERED USERS
+// CAPTURING PASS SECURITY ENGINE INTERCEPTING CALLS FOR ANONYMOUS VISITORS
 document.addEventListener('click', function(e) {
-  const clickedElement = e.target.closest('.btn-call, .btn-wa');
-  if (clickedElement) {
+  const actionButton = e.target.closest('.btn-call, .btn-wa');
+  if (actionButton) {
+    const targetCard = actionButton.closest('.biz-card');
+    const targetedBusiness = targetCard ? targetCard.getAttribute('data-name') : 'Desconocido';
+    const contextActionType = actionButton.classList.contains('btn-call') ? 'Click_Llamar' : 'Click_WhatsApp';
+    
     const userSessionToken = localStorage.getItem('mc_user_id');
     if (!userSessionToken) {
       e.preventDefault();
       e.stopPropagation();
       openAuthModal();
+    } else {
+      // Log event seamlessly to 'Log de Usario' tab via macro webhook
+      logUserEvent(contextActionType, '', targetedBusiness);
     }
   }
 }, true);
