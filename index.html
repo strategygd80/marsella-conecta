@@ -57,7 +57,7 @@
   .profile-badge-nav:hover { background: var(--accent); border-color: var(--accent); }
 
   .nav-cta {
-    background: var(--accent); color: #fff; border: none; pointer: pointer;
+    background: var(--accent); color: #fff; border: none; cursor: pointer;
     padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
     font-family: 'DM Sans', sans-serif; text-decoration: none;
     transition: transform 0.15s, opacity 0.15s;
@@ -782,6 +782,21 @@ function renderCards() {
   } else {
     grid.innerHTML = sorted.map((item, idx) => generateCardHtml(item, idx)).join('');
   }
+}
+
+async function loadData() {
+  try {
+    const res = await fetch(SHEET_CSV_URL + '&cb=' + new Date().getTime());
+    if (!res.ok) throw new Error('fetch failed');
+    const text = await res.text();
+    const parsed = parseCSV(text);
+    allData = parsed.length ? parsed : SAMPLE_DATA;
+  } catch(e) {
+    console.warn('Using sample data:', e);
+    allData = SAMPLE_DATA;
+  }
+  filtered = [...allData];
+  renderStats(); renderCategories(); renderPills(); renderCards();
 }
 
 document.addEventListener('click', function(e) {
