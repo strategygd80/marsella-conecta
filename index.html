@@ -471,7 +471,7 @@ async function executeNeighborLogin() {
     for (let i = 1; i < lines.length; i++) {
       if (!lines[i].trim()) continue;
       const cols = parseCSVLine(lines[i]);
-      if (cols.length < 8) continue;
+      if (cols.length < 9) continue;
 
       const registeredEmail = (cols[2] || '').trim().replace(/^"|"$/g,'').toLowerCase();
       const registeredPass = (cols[8] || '').trim().replace(/^"|"$/g,'');
@@ -501,7 +501,7 @@ async function executeNeighborLogin() {
     }
   } catch(e) {
     console.error('Authentication anomaly caught:', e);
-    alert('Error de conexión: No se pudo descargar la lista de vecinos autorizados.');
+    alert('Error temporal de conexión con el nodo de seguridad de Google. Reintenta.');
   } finally {
     loginBtn.disabled = false;
     loginBtn.textContent = 'Iniciar Sesión';
@@ -604,7 +604,7 @@ function parseCSVLine(line) {
   const result = []; let cur = ''; let inQ = false;
   for (let i = 0; i < line.length; i++) {
     if (line[i] === '"') { inQ = !inQ; }
-    else if (line[i] === ',' && !inQ) { result.push(result); cur = ''; }
+    else if (line[i] === ',' && !inQ) { result.push(cur); cur = ''; }
     else cur += line[i];
   }
   result.push(cur); return result;
@@ -641,17 +641,6 @@ function renderCategories() {
     d.onclick = () => setFilter(cat);
     grid.appendChild(d);
   });
-}
-
-// Fixed nested line references to array scopes
-function parseCSVLine(line) {
-  const result = []; let cur = ''; let inQ = false;
-  for (let i = 0; i < line.length; i++) {
-    if (line[i] === '"') { inQ = !inQ; }
-    else if (line[i] === ',' && !inQ) { result.push(cur); cur = ''; }
-    else cur += line[i];
-  }
-  result.push(cur); return result;
 }
 
 function renderPills() {
@@ -746,8 +735,8 @@ function generateCardHtml(r, index) {
     ${hours?`<div class="biz-hours">🕐 <span>${hours}</span></div>`:''}
     ${starsHtml?`<div class="biz-stars">${starsHtml} ${stars}/5</div>`:''}
     <div class="biz-actions">
-      ${tel?`<a class="btn-call" href="tel:+${COUNTRY_CODE}${tel}">📞 Llamar</a>`:''}
-      ${tel?`<a class="btn-wa" href="https://wa.me/#${COUNTRY_CODE}${tel}" target="_blank">💬 WhatsApp</a>`:''}
+      <a class="btn-call" href="tel:+${COUNTRY_CODE}${tel}">📞 Llamar</a>
+      ${tel?`<a class="btn-wa" href="https://wa.me/${COUNTRY_CODE}${tel}" target="_blank">💬 WhatsApp</a>`:''}
       <button class="btn-share" onclick="shareBiz('${name}','${tel}')" title="Compartir">⬆️</button>
     </div>
   </div>`;
