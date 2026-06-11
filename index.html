@@ -58,10 +58,7 @@
 
   /* HERO */
   .hero {
-    background: var(--ink);
-    padding: 52px 24px 44px;
-    text-align: center;
-    position: relative; overflow: hidden;
+    background: var(--ink); padding: 52px 24px 44px; text-align: center; position: relative; overflow: hidden;
   }
   .hero::before {
     content: ''; position: absolute; inset: 0;
@@ -74,57 +71,36 @@
   }
   .hero h1 {
     font-family: 'Syne', sans-serif; font-size: clamp(2rem, 6vw, 3.2rem);
-    font-weight: 800; color: #fff; line-height: 1.1; margin-bottom: 14px;
-    position: relative;
+    font-weight: 800; color: #fff; line-height: 1.1; margin-bottom: 14px; position: relative;
   }
   .hero h1 em { color: var(--accent); font-style: normal; }
   .hero p { color: rgba(255,255,255,0.6); font-size: 1rem; max-width: 480px; margin: 0 auto 28px; }
   .search-wrap { max-width: 540px; margin: 0 auto; position: relative; }
   .search-wrap input {
-    width: 100%; padding: 16px 56px 16px 20px;
-    border: none; border-radius: 12px; font-size: 0.95rem;
-    font-family: 'DM Sans', sans-serif; background: #fff;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.25);
-    outline: none;
+    width: 100%; padding: 16px 56px 16px 20px; border: none; border-radius: 12px; font-size: 0.95rem;
+    font-family: 'DM Sans', sans-serif; background: #fff; box-shadow: 0 4px 24px rgba(0,0,0,0.25); outline: none;
   }
   .search-wrap button {
     position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-    background: var(--accent); border: none; border-radius: 8px;
-    width: 38px; height: 38px; cursor: pointer; display: grid; place-items: center;
-    transition: opacity 0.2s;
+    background: var(--accent); border: none; border-radius: 8px; width: 38px; height: 38px; cursor: pointer;
+    display: grid; place-items: center; transition: opacity 0.2s;
   }
   .search-wrap button:hover { opacity: 0.85; }
   .search-wrap button svg { width: 16px; height: 16px; fill: none; stroke: #fff; stroke-width: 2.5; stroke-linecap: round; }
 
   /* STATS BAR */
-  .stats-bar {
-    display: flex; gap: 0; background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    overflow-x: auto; scrollbar-width: none;
-  }
+  .stats-bar { display: flex; gap: 0; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
   .stats-bar::-webkit-scrollbar { display: none; }
-  .stat-item {
-    flex: 1; min-width: 100px; text-align: center; padding: 14px 12px;
-    border-right: 1px solid var(--border);
-  }
+  .stat-item { flex: 1; min-width: 100px; text-align: center; padding: 14px 12px; border-right: 1px solid var(--border); }
   .stat-item:last-child { border-right: none; }
   .stat-num { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--accent); }
   .stat-label { font-size: 0.7rem; color: var(--ink-muted); margin-top: 2px; }
 
   /* CATEGORIES */
   .section { padding: 28px 20px; }
-  .section-title {
-    font-family: 'Syne', sans-serif; font-size: 0.7rem; font-weight: 700;
-    letter-spacing: 2px; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 14px;
-  }
-  .cat-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px;
-  }
-  .cat-card {
-    background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px;
-    padding: 14px 8px; text-align: center; cursor: pointer;
-    transition: all 0.2s; user-select: none;
-  }
+  .section-title { font-family: 'Syne', sans-serif; font-size: 0.7rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 14px; }
+  .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; }
+  .cat-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px 8px; text-align: center; cursor: pointer; transition: all 0.2s; user-select: none; }
   .cat-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--card-shadow); }
   .cat-card.active { border-color: var(--accent); background: #fff5f3; }
   .cat-icon { font-size: 1.6rem; margin-bottom: 6px; }
@@ -132,51 +108,33 @@
 
   /* PILLS */
   .pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
-  .pill {
-    padding: 7px 16px; border-radius: 20px; font-size: 0.78rem; font-weight: 500;
-    border: 1.5px solid var(--border); background: var(--surface); cursor: pointer;
-    transition: all 0.18s; white-space: nowrap;
-  }
+  .pill { padding: 7px 16px; border-radius: 20px; font-size: 0.78rem; font-weight: 500; border: 1.5px solid var(--border); background: var(--surface); cursor: pointer; transition: all 0.18s; white-space: nowrap; }
   .pill:hover { border-color: var(--accent); color: var(--accent); }
   .pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-  /* LISTINGS */
-  .listings-header {
-    display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
-  }
+  /* LISTINGS & HOMEPAGE VISUAL SECTIONS */
+  .listings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
   .results-count { font-size: 0.82rem; color: var(--ink-muted); }
-  .sort-select {
-    font-family: 'DM Sans', sans-serif; font-size: 0.8rem; border: 1.5px solid var(--border);
-    border-radius: 8px; padding: 6px 10px; background: var(--surface); cursor: pointer; outline: none;
-  }
+  .sort-select { font-family: 'DM Sans', sans-serif; font-size: 0.8rem; border: 1.5px solid var(--border); border-radius: 8px; padding: 6px 10px; background: var(--surface); cursor: pointer; outline: none; }
   .listings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
-
-  .biz-card {
-    background: var(--surface); border-radius: var(--radius);
-    border: 1.5px solid var(--border); box-shadow: var(--card-shadow);
-    overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;
-    animation: fadeUp 0.3s ease both;
+  
+  .section-divider {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--ink);
+    margin: 28px 0 14px 0; width: 100%; grid-column: 1 / -1; display: flex; align-items: center; gap: 12px;
   }
+  .section-divider::after { content: ''; flex: 1; height: 1.5px; background: var(--border); }
+
+  .biz-card { background: var(--surface); border-radius: var(--radius); border: 1.5px solid var(--border); box-shadow: var(--card-shadow); overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; animation: fadeUp 0.3s ease both; }
   .biz-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(26,23,20,0.12); }
   @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
 
   .biz-header { padding: 16px 16px 0; display: flex; align-items: flex-start; gap: 12px; }
-  .biz-avatar {
-    width: 46px; height: 46px; border-radius: 10px; flex-shrink: 0;
-    background: linear-gradient(135deg, var(--accent) 0%, #ff6b3d 100%);
-    display: grid; place-items: center; font-size: 1.3rem;
-  }
+  .biz-avatar { width: 46px; height: 46px; border-radius: 10px; flex-shrink: 0; background: linear-gradient(135deg, var(--accent) 0%, #ff6b3d 100%); display: grid; place-items: center; font-size: 1.3rem; }
   .biz-meta { flex: 1; min-width: 0; }
-  .biz-name {
-    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
+  .biz-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .biz-cat-barrio { font-size: 0.75rem; color: var(--ink-muted); margin-top: 2px; }
   .biz-badges { display: flex; gap: 5px; margin-top: 6px; flex-wrap: wrap; }
-  .badge {
-    font-size: 0.62rem; font-weight: 700; letter-spacing: 0.5px; padding: 3px 8px;
-    border-radius: 6px; text-transform: uppercase;
-  }
+  .badge { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.5px; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; }
   .badge-verified { background: #e6f4ee; color: var(--accent2); }
   .badge-new { background: #fff3cd; color: #92600a; }
   .badge-featured { background: #fce8e3; color: var(--accent); }
@@ -187,10 +145,7 @@
   .biz-hours span { color: var(--accent2); font-weight: 600; }
   .biz-stars { padding: 0 16px 12px; font-size: 0.8rem; color: var(--gold); }
 
-  .biz-actions {
-    padding: 12px 16px; border-top: 1px solid var(--border);
-    display: flex; gap: 8px;
-  }
+  .biz-actions { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
   .btn-call, .btn-wa, .btn-share {
     flex: 1; padding: 9px; border-radius: 9px; font-size: 0.78rem; font-weight: 600;
     border: none; cursor: pointer; font-family: 'DM Sans', sans-serif;
@@ -226,50 +181,23 @@
   .mc-modal-cta:hover { opacity: 0.9; }
   .mc-modal-close { background: none; border: none; font-size: 0.82rem; color: var(--ink-muted); cursor: pointer; text-decoration: underline; }
 
-  /* EMPTY STATE */
   .empty-state { text-align: center; padding: 60px 20px; color: var(--ink-muted); }
   .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
-  .empty-state p { font-size: 0.9rem; }
-
-  /* REGISTER CTA BANNER */
-  .cta-banner {
-    margin: 24px 20px; padding: 28px 24px; border-radius: 16px;
-    background: linear-gradient(135deg, var(--ink) 0%, #2d2420 100%);
-    color: #fff; display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
-  }
+  
+  .cta-banner { margin: 24px 20px; padding: 28px 24px; border-radius: 16px; background: linear-gradient(135deg, var(--ink) 0%, #2d2420 100%); color: #fff; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
   .cta-banner-text { flex: 1; min-width: 200px; }
   .cta-banner h3 { font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 800; margin-bottom: 5px; }
   .cta-banner p { font-size: 0.83rem; color: rgba(255,255,255,0.65); }
-  .cta-banner a {
-    background: var(--accent); color: #fff; text-decoration: none;
-    padding: 12px 24px; border-radius: 10px; font-weight: 700; font-size: 0.88rem;
-    white-space: nowrap; transition: opacity 0.2s;
-  }
+  .cta-banner a { background: var(--accent); color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 700; font-size: 0.88rem; white-space: nowrap; transition: opacity 0.2s; }
   .cta-banner a:hover { opacity: 0.85; }
 
-  /* FOOTER */
-  footer {
-    background: var(--ink); color: rgba(255,255,255,0.5);
-    padding: 28px 24px; text-align: center; font-size: 0.78rem; margin-top: 20px;
-  }
+  footer { background: var(--ink); color: rgba(255,255,255,0.5); padding: 28px 24px; text-align: center; font-size: 0.78rem; margin-top: 20px; }
   footer a { color: rgba(255,255,255,0.7); text-decoration: none; }
   footer strong { color: #fff; font-family: 'Syne', sans-serif; }
-
-  /* LOADING */
   .loading { text-align: center; padding: 40px; color: var(--ink-muted); font-size: 0.9rem; }
-  .spinner {
-    width: 28px; height: 28px; border: 3px solid var(--border);
-    border-top-color: var(--accent); border-radius: 50%;
-    animation: spin 0.7s linear infinite; margin: 0 auto 12px;
-  }
+  .spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 12px; }
   @keyframes spin { to { transform: rotate(360deg); } }
-
-  @media (max-width: 600px) {
-    .nav-links { display: none; }
-    .listings-grid { grid-template-columns: 1fr; }
-    .cta-banner { text-align: center; }
-    .cta-banner-text { min-width: 100%; }
-  }
+  @media (max-width: 600px) { .nav-links { display: none; } .listings-grid { grid-template-columns: 1fr; } .cta-banner { text-align: center; } .cta-banner-text { min-width: 100%; } }
 </style>
 </head>
 <body>
@@ -339,7 +267,7 @@
   <a href="register.html">Registrar negocio</a> &nbsp;·&nbsp;
   <a href="plans.html">Planes y precios</a> &nbsp;·&nbsp;
   <a href="admin.html">Admin</a>
-  <br><br>© 2025 Marsella Conecta. Hecho con ❤️ para la comunidad.
+  <br><br>© 2026 Marsella Conecta. Hecho con ❤️ para la comunidad.
 </footer>
 
 <div class="mc-modal-overlay" id="authGateModal">
@@ -354,23 +282,20 @@
 
 <script>
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRtiBEyirRS73NI23sRAllDT7g3aphl5uYmhDIRHKhzwjYDZD8c0YmNv19WfkBgHXZxTLlS5HnROUOz/pub?gid=698284721&single=true&output=csv';
-const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSe4JJwwYb6aTW-XiAerbsheCKXpQ6PlOEBNMnR9Jzsn44uG4g/viewform?usp=header';
 const GOOGLE_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbyvDoqy9S9kIm9CUbHRppPQ_AFH8D7gfilV1F9nLgkdwEuM9Zl1NuwiFSFy8dfir0VZ/exec';
 const COUNTRY_CODE = '503';
 
 const CATEGORY_ICONS = {
-  'Taxi': '🚕', 'Comida': '🍴', 'Servicios Otros': '🔧',
+  'Taxi': '🚕', 'Transporte': '🚕', 'Comida': '🍴', 'Alimentacion': '🍴', 'Servicios Otros': '🔧',
   'Bebidas': '🍺', 'Instalacion AC': '❄️', 'Plomería': '🔩',
   'Electricidad': '⚡', 'Mecánica': '🔨', 'Belleza': '💇',
-  'Farmacia': '💊', 'Tienda': '🛒', 'Médico': '🏥',
+  'Farmacia': '💊', 'Tienda': '🛒', 'Médico': '🏥', 'Servicios Tecnicos/ Hogar': '🏠'
 };
 const FALLBACK_ICON = '📦';
 
 const SAMPLE_DATA = [
-  { Nombre:'VIP Taxi Marsella', Categoría:'Taxi', Barrio:'Colonia Marsella', Teléfono:'75404955', Descripción:'Servicio de taxi 24/7 para toda la zona', Estado:'Activo', Estrellas:'5', Horario:'Todos los días 6am-10pm' },
-  { Nombre:'Pupusería La Abuela', Categoría:'Comida', Barrio:'Zona Central', Teléfono:'72113344', Descripción:'Las mejores pupusas de la colonia desde 1985', Estado:'Activo', Estrellas:'5', Horario:'Mar-Dom 11am-8pm' },
-  { Nombre:'Refresquería El Tropical', Categoría:'Bebidas', Barrio:'Bloque B', Teléfono:'71005566', Descripción:'Jugos naturales, batidos y café de altura', Estado:'Activo', Estrellas:'4', Horario:'Lun-Sáb 7am-6pm' },
-  { Nombre:'Técnico AC Frío Total', Categoría:'Instalacion AC', Barrio:'Zona Norte', Teléfono:'70887722', Descripción:'Instalación y mantenimiento de aires acondicionados', Estado:'Activo', Estrellas:'5', Horario:'Lun-Vie 8am-5pm' },
+  { Nombre:'VIP Taxi Marsella', Categoría:'Transporte', Sub_Categoria:'Taxi', Barrio:'Colonia Marsella', Teléfono:'75404955', Descripción:'Servicio de taxi 24/7 para toda la zona', Estado:'Activo', Estrellas:'5', Horario:'Todos los días 6am-10pm', Plan:'Gratuito' },
+  { Nombre:'Pupusería La Abuela', Categoría:'Alimentacion', Sub_Categoria:'Pupusería', Barrio:'Zona Central', Teléfono:'72113344', Descripción:'Las mejores pupusas de la colonia desde 1985', Estado:'Activo', Estrellas:'5', Horario:'Mar-Dom 11am-8pm', Plan:'Gratuito' }
 ];
 
 let allData = [];
@@ -378,7 +303,6 @@ let filtered = [];
 let activeFilter = 'Todos';
 let searchDebounceTimer = null;
 
-// SERVERLESS REAL-TIME EVENT ANALYTICS ENGINE
 function logUserEvent(eventType, searchVal = '', bizName = '') {
   const activeSessionId = localStorage.getItem('mc_user_id') || 'Anonimo';
   const currentTimestamp = new Date().toLocaleString("es-SV", {timeZone: "America/El_Salvador"});
@@ -392,16 +316,14 @@ function logUserEvent(eventType, searchVal = '', bizName = '') {
     Negocio_Nombre: bizName
   };
 
-  // Safe non-blocking asynchronous transmission
   fetch(GOOGLE_SCRIPT_API_URL, {
     method: 'POST',
     mode: 'no-cors',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(analyticalPayload)
-  }).catch(err => console.warn("Behavior analytics pipe congestion:", err));
+  }).catch(err => console.warn("Analytics engine timeout:", err));
 }
 
-// USER SESSION VALIDATION MIDDLEWARE
 function evaluateUserSession() {
   const verifiedToken = localStorage.getItem('mc_user_id');
   const targetNavBtn = document.getElementById('navJoinBtn');
@@ -409,17 +331,11 @@ function evaluateUserSession() {
     if (targetNavBtn) targetNavBtn.style.display = 'block';
   } else {
     if (targetNavBtn) targetNavBtn.style.display = 'none';
-    console.log("Persistent local session validation successful. Active user token: " + verifiedToken);
   }
 }
 
-function openAuthModal() {
-  document.getElementById('authGateModal').classList.add('active');
-}
-
-function closeAuthModal() {
-  document.getElementById('authGateModal').classList.remove('active');
-}
+function openAuthModal() { document.getElementById('authGateModal').classList.add('active'); }
+function closeAuthModal() { document.getElementById('authGateModal').classList.remove('active'); }
 
 function parseCSV(text) {
   const lines = text.trim().split('\n');
@@ -430,22 +346,14 @@ function parseCSV(text) {
   return lines.slice(1).map(line => {
     const cols = parseCSVLine(line);
     const obj = {};
-    // skip timestamp
     let offset = cols.length > headers.length ? 1 : 0;
-    headers.forEach((h, i) => {
-      obj[h] = (cols[i + offset] || '').trim().replace(/^"|"$/g,'');
-    });
-    // also store by raw header
-    rawHeaders.forEach((h, i) => {
-      obj[h] = (cols[i + offset] || '').trim().replace(/^"|"$/g,'');
-    });
+    headers.forEach((h, i) => { obj[h] = (cols[i + offset] || '').trim().replace(/^"|"$/g,''); });
+    rawHeaders.forEach((h, i) => { obj[h] = (cols[i + offset] || '').trim().replace(/^"|"$/g,''); });
     return obj;
   }).filter(r => getField(r,'Nombre'));
 }
 
-function normalizeKey(k) {
-  return k.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'_');
-}
+function normalizeKey(k) { return k.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'_'); }
 
 function parseCSVLine(line) {
   const result = []; let cur = ''; let inQ = false;
@@ -469,12 +377,11 @@ function getField(row, field) {
 }
 
 function cleanPhone(p) { return p.replace(/\D/g,''); }
-
 function renderStats() {
   document.getElementById('totalBiz').textContent = allData.length;
   const cats = new Set(allData.map(r => getField(r,'Categoría')).filter(Boolean));
   document.getElementById('totalCat').textContent = cats.size;
-  const ver = allData.filter(r => ['activo','verificado','active'].includes((getField(r,'Estado')||'').toLowerCase())).length;
+  const ver = allData.filter(r => ['activo','verificado','active','pendiente validacion'].includes((getField(r,'Estado')||'').toLowerCase())).length;
   document.getElementById('totalVer').textContent = ver;
 }
 
@@ -494,9 +401,7 @@ function renderCategories() {
 function renderPills() {
   const cats = ['Todos', ...new Set(allData.map(r => getField(r,'Categoría')).filter(Boolean))];
   const row = document.getElementById('pillRow');
-  row.innerHTML = cats.map(c =>
-    `<div class="pill${c===activeFilter?' active':''}" onclick="setFilter('${c}')">${c}</div>`
-  ).join('');
+  row.innerHTML = cats.map(c => `<div class="pill${c===activeFilter?' active':''}" onclick="setFilter('${c}')">${c}</div>`).join('');
 }
 
 function setFilter(cat) {
@@ -513,24 +418,38 @@ function doSearch() {
 }
 
 function applyFilters() {
-  const q = (document.getElementById('searchInput').value||'').toLowerCase();
+  const q = (document.getElementById('searchInput').value||'').toLowerCase().trim();
   
-  // Real-time keystroke tracking with stabilized input debounce execution window
   clearTimeout(searchDebounceTimer);
-  if (q.trim().length > 2) {
+  if (q.length > 2) {
     searchDebounceTimer = setTimeout(() => {
-      logUserEvent('Busqueda_Palabra', q.trim(), '');
+      logUserEvent('Busqueda_Palabra', q, '');
     }, 1200);
   }
 
   filtered = allData.filter(r => {
     const matchCat = activeFilter === 'Todos' || getField(r,'Categoría') === activeFilter;
     if (!q) return matchCat;
+    
+    // ALGORITHMIC DEEP MULTI-LAYER SEARCH ENGINE (Scans explicit cross-relational indices)
     const hay = [
-      getField(r,'Nombre'), getField(r,'Categoría'), getField(r,'Barrio'),
-      getField(r,'Descripción'), getField(r,'Horario')
+      getField(r,'Nombre'),
+      getField(r,'Categoría'),
+      getField(r,'Sub-Categoria'),
+      getField(r,'Subcategoria'),
+      getField(r,'Sub Categoria - Oferta'),
+      getField(r,'Barrio'),
+      getField(r,'Descripción'),
+      getField(r,'Horario'),
+      getField(r,'Servicio Otro')
     ].join(' ').toLowerCase();
-    return matchCat && hay.includes(q);
+    
+    // Implicit category mapping fallback logic (e.g., typing "taxi" triggers "transporte")
+    let implicitMatch = false;
+    if (q === 'taxi' && hay.includes('transporte')) implicitMatch = true;
+    if (q === 'comida' && hay.includes('alimentacion')) implicitMatch = true;
+    
+    return matchCat && (hay.includes(q) || implicitMatch);
   });
   renderCards();
 }
@@ -538,58 +457,94 @@ function applyFilters() {
 document.getElementById('searchInput').addEventListener('input', applyFilters);
 document.getElementById('searchInput').addEventListener('keydown', e => e.key==='Enter' && doSearch());
 
+// CARD LOGIC GENERATOR HELPER
+function generateCardHtml(r, index) {
+  const name = getField(r,'Nombre');
+  const cat = getField(r,'Categoría');
+  const barrio = getField(r,'Barrio');
+  const tel = cleanPhone(getField(r,'Teléfono'));
+  const desc = getField(r,'Descripción');
+  const status = (getField(r,'Estado')||'').toLowerCase();
+  const stars = parseFloat(getField(r,'Estrellas'))||0;
+  const hours = getField(r,'Horario');
+  const plan = (getField(r,'Plan') || '').toLowerCase();
+  const icon = CATEGORY_ICONS[cat] || FALLBACK_ICON;
+  const isVerified = ['activo','verificado','active'].includes(status);
+  
+  // SECURE TIER-DRIVEN BADGE CONTEXT (No one on Free/Basic gets a badge automatically)
+  const isFeatured = plan.includes('pro') || plan.includes('premium') || plan.includes('destacado');
+  
+  const badges = [
+    isVerified ? '<span class="badge badge-verified">✓ Activo</span>' : '',
+    isFeatured ? '<span class="badge badge-featured">⭐ Destacado</span>' : '',
+  ].filter(Boolean).join('');
+  const starsHtml = stars ? '★'.repeat(Math.round(stars)) + '☆'.repeat(5-Math.round(stars)) : '';
+
+  return `<div class="biz-card" data-name="${name}" style="animation-delay:${index*0.03}s">
+    <div class="biz-header">
+      <div class="biz-avatar">${icon}</div>
+      <div class="biz-meta">
+        <div class="biz-name">${name}</div>
+        <div class="biz-cat-barrio">${cat}${barrio?' · '+barrio:''}</div>
+        <div class="biz-badges">${badges}</div>
+      </div>
+    </div>
+    ${desc?`<div class="biz-desc">${desc}</div>`:''}
+    ${hours?`<div class="biz-hours">🕐 <span>${hours}</span></div>`:''}
+    ${starsHtml?`<div class="biz-stars">${starsHtml} ${stars}/5</div>`:''}
+    <div class="biz-actions">
+      ${tel?`<a class="btn-call" href="tel:+${COUNTRY_CODE}${tel}">📞 Llamar</a>`:''}
+      ${tel?`<a class="btn-wa" href="https://wa.me/${COUNTRY_CODE}${tel}" target="_blank">💬 WhatsApp</a>`:''}
+      <button class="btn-share" onclick="shareBiz('${name}','${tel}')" title="Compartir">⬆️</button>
+    </div>
+  </div>`;
+}
+
 function renderCards() {
   const sort = document.getElementById('sortSelect').value;
-  const sorted = [...filtered].sort((a,b) => {
+  const isSearching = document.getElementById('searchInput').value.trim().length > 0;
+  
+  // Sort listings prior to chunk division layout building
+  let sorted = [...filtered].sort((a,b) => {
     if (sort === 'stars') return (parseFloat(getField(b,'Estrellas'))||0) - (parseFloat(getField(a,'Estrellas'))||0);
     if (sort === 'name') return getField(a,'Nombre').localeCompare(getField(b,'Nombre'));
-    return 0;
+    return 0; // Natural chronological sheet addition order fallback
   });
 
   document.getElementById('resultsCount').textContent = `${sorted.length} negocio${sorted.length!==1?'s':''} encontrado${sorted.length!==1?'s':''}`;
-
   const grid = document.getElementById('listingsGrid');
+  
   if (!sorted.length) {
     grid.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>No se encontraron negocios con ese criterio.</p></div>';
     return;
   }
 
-  grid.innerHTML = sorted.map((r, i) => {
-    const name = getField(r,'Nombre');
-    const cat = getField(r,'Categoría');
-    const barrio = getField(r,'Barrio');
-    const tel = cleanPhone(getField(r,'Teléfono'));
-    const desc = getField(r,'Descripción');
-    const status = (getField(r,'Estado')||'').toLowerCase();
-    const stars = parseFloat(getField(r,'Estrellas'))||0;
-    const hours = getField(r,'Horario');
-    const icon = CATEGORY_ICONS[cat] || FALLBACK_ICON;
-    const isVerified = ['activo','verificado','active'].includes(status);
-    const badges = [
-      isVerified ? '<span class="badge badge-verified">✓ Verificado</span>' : '',
-      i < 2 ? '<span class="badge badge-featured">⭐ Destacado</span>' : '',
-    ].filter(Boolean).join('');
-    const starsHtml = stars ? '★'.repeat(Math.round(stars)) + '☆'.repeat(5-Math.round(stars)) : '';
-
-    return `<div class="biz-card" data-name="${name}" style="animation-delay:${i*0.04}s">
-      <div class="biz-header">
-        <div class="biz-avatar">${icon}</div>
-        <div class="biz-meta">
-          <div class="biz-name">${name}</div>
-          <div class="biz-cat-barrio">${cat}${barrio?' · '+barrio:''}</div>
-          <div class="biz-badges">${badges}</div>
-        </div>
-      </div>
-      ${desc?`<div class="biz-desc">${desc}</div>`:''}
-      ${hours?`<div class="biz-hours">🕐 <span>${hours}</span></div>`:''}
-      ${starsHtml?`<div class="biz-stars">${starsHtml} ${stars}/5</div>`:''}
-      <div class="biz-actions">
-        ${tel?`<a class="btn-call" href="tel:+${COUNTRY_CODE}${tel}">📞 Llamar</a>`:''}
-        ${tel?`<a class="btn-wa" href="https://wa.me/${COUNTRY_CODE}${tel}" target="_blank">💬 WhatsApp</a>`:''}
-        <button class="btn-share" onclick="shareBiz('${name}','${tel}')" title="Compartir">⬆️</button>
-      </div>
-    </div>`;
-  }).join('');
+  // HOMEPAGE SECTIONS DISPATCHER (Triggers only when viewing 'Todos' without an active search filter query)
+  if (activeFilter === 'Todos' && !isSearching) {
+    // Treat the bottom-most 4 sheet items as the newest added entries
+    const totalCount = sorted.length;
+    const newEntrepreneurs = sorted.slice(Math.max(0, totalCount - 4)).reverse();
+    const generalDirectory = sorted.slice(0, Math.max(0, totalCount - 4));
+    
+    let compiledHtml = '';
+    
+    if (newEntrepreneurs.length > 0) {
+      compiledHtml += `<div class="section-divider">🌱 Nuevos Emprendimientos (Recién Agregados)</div>`;
+      compiledHtml += newEntrepreneurs.map((item, idx) => generateCardHtml(item, idx)).join('');
+    }
+    
+    if (generalDirectory.length > 0) {
+      compiledHtml += `<div class="section-divider">🏪 Todos los Negocios</div>`;
+      compiledHtml += generalDirectory.map((item, idx) => generateCardHtml(item, idx)).join('');
+    } else if (newEntrepreneurs.length === 0) {
+      compiledHtml = sorted.map((item, idx) => generateCardHtml(item, idx)).join('');
+    }
+    
+    grid.innerHTML = compiledHtml;
+  } else {
+    // Flat structured fallback grid for search arrays or single tab filters
+    grid.innerHTML = sorted.map((item, idx) => generateCardHtml(item, idx)).join('');
+  }
 }
 
 function shareBiz(name, tel) {
@@ -617,7 +572,6 @@ async function loadData() {
   renderStats(); renderCategories(); renderPills(); renderCards();
 }
 
-// CAPTURING PASS SECURITY ENGINE INTERCEPTING CALLS FOR ANONYMOUS VISITORS
 document.addEventListener('click', function(e) {
   const actionButton = e.target.closest('.btn-call, .btn-wa');
   if (actionButton) {
@@ -631,15 +585,12 @@ document.addEventListener('click', function(e) {
       e.stopPropagation();
       openAuthModal();
     } else {
-      // Log event seamlessly to 'Log de Usario' tab via macro webhook
       logUserEvent(contextActionType, '', targetedBusiness);
     }
   }
 }, true);
 
-// EXECUTE SESSION METRICS ON READINESS
 document.addEventListener('DOMContentLoaded', evaluateUserSession);
-
 loadData();
 </script>
 </body>
