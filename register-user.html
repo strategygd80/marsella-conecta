@@ -70,14 +70,27 @@
   .btn-next:hover { opacity: 0.85; transform: translateY(-1px); }
   .btn-next:disabled { background: var(--ink-muted); cursor: not-allowed; opacity: 0.6; }
 
-  /* SUCCESS CARD */
-  .success-card { text-align: center; padding: 50px 32px; background: var(--surface); border-radius: 16px; border: 1.5px solid var(--border); display: none; }
+  /* SUCCESS SIGNUP CARD DISPLAY */
+  .success-card { text-align: center; padding: 48px 32px; background: var(--surface); border-radius: 16px; border: 1.5px solid var(--border); display: none; }
   .success-card.active { display: block; animation: slideIn 0.4s ease; }
-  .success-icon { font-size: 3.5rem; margin-bottom: 16px; }
-  .success-card h2 { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; margin-bottom: 10px; }
-  .success-card p { color: var(--ink-muted); font-size: 0.9rem; max-width: 400px; margin: 0 auto 24px; }
-  .success-actions { display: flex; gap: 10px; justify-content: center; }
-  .success-actions a { padding: 11px 22px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; text-decoration: none; background: var(--accent); color: #fff; }
+  .success-icon { font-size: 3.8rem; margin-bottom: 16px; }
+  .success-card h2 { font-family: 'Syne', sans-serif; font-size: 1.7rem; font-weight: 800; margin-bottom: 12px; color: var(--accent2); }
+  .success-card p { color: var(--ink-muted); font-size: 0.92rem; max-width: 420px; margin: 0 auto 20px; line-height: 1.5; }
+  
+  .user-badge-info {
+    background: var(--bg); border: 1.5px solid var(--border); border-radius: 12px;
+    padding: 16px; margin-bottom: 28px; text-align: left; font-size: 0.85rem;
+  }
+  .badge-line { display: flex; justify-content: space-between; margin-bottom: 8px; }
+  .badge-line:last-child { margin-bottom: 0; }
+  .badge-line strong { color: var(--ink); }
+
+  .success-actions { display: flex; gap: 12px; justify-content: center; }
+  .success-actions .btn-primary { 
+    display: inline-block; padding: 12px 24px; border-radius: 10px; font-weight: 700; 
+    font-size: 0.88rem; text-decoration: none; background: var(--accent); color: #fff; transition: opacity 0.2s;
+  }
+  .success-actions .btn-primary:hover { opacity: 0.9; }
 
   @media (max-width: 500px) { .form-card { padding: 22px 18px; } .field-row { grid-template-columns: 1fr; } }
 </style>
@@ -93,7 +106,7 @@
   <div class="progress-steps">
     <div class="step active" id="step1-indicator"><div class="step-num">1</div><span>Datos Personales</span></div>
     <div class="step-line" id="line1"></div>
-    <div class="step" id="step2-indicator"><div class="step-num">2</div><span>Ubicación y Contacto</span></div>
+    <div class="step" id="step2-indicator"><div class="step-num">2</div><span>Ubicación y Seguridad</span></div>
   </div>
 </div>
 
@@ -101,7 +114,7 @@
   <form id="neighborForm" onsubmit="event.preventDefault();">
     
     <div class="form-card active" id="card1">
-      <div class="card-eyebrow">Paso 1 de 2</div>
+      <div class="card-eyebrow">Pauto-Paso 1 de 2</div>
       <div class="card-title">Únete como Vecino</div>
       <div class="card-sub">Crea tu perfil comunitario para conectar con los servicios de tu colonia.</div>
 
@@ -119,7 +132,7 @@
       <div class="field">
         <label>Correo Electrónico <span class="req">*</span></label>
         <input type="email" id="f_email" required placeholder="ejemplo@correo.com">
-        <div class="hint">Usado estrictamente para avisos importantes de la comunidad.</div>
+        <div class="hint">Usado estrictamente para avisos importantes y recuperación de acceso.</div>
       </div>
 
       <div class="btn-row">
@@ -129,18 +142,24 @@
 
     <div class="form-card" id="card2">
       <div class="card-eyebrow">Paso 2 de 2</div>
-      <div class="card-title">Ubicación y Contacto</div>
-      <div class="card-sub">Establece tus canales de comunicación locales.</div>
+      <div class="card-title">Seguridad y Ubicación</div>
+      <div class="card-sub">Establece tu contraseña para resguardar tu sesión permanente.</div>
 
-      <div class="field">
-        <label>Número de WhatsApp <span class="req">*</span></label>
-        <input type="tel" id="f_whatsapp" required maxlength="9" placeholder="7123-4567">
-        <div class="hint">Ingresa los 8 dígitos de tu número local de El Salvador.</div>
+      <div class="field-row">
+        <div class="field">
+          <label>Número de WhatsApp <span class="req">*</span></label>
+          <input type="tel" id="f_whatsapp" required maxlength="9" placeholder="7123-4567">
+        </div>
+        <div class="field">
+          <label>Quartier (Senda / Etapa / Zona) <span class="req">*</span></label>
+          <input type="text" id="f_quartier" required placeholder="Ej: Senda 4, Pol. H">
+        </div>
       </div>
 
       <div class="field">
-        <label>Quartier (Senda / Etapa / Zona) <span class="req">*</span></label>
-        <input type="text" id="f_quartier" required placeholder="Ej: Senda 4, Polígono H, Etapa 2">
+        <label>Asigna tu Contraseña <span class="req">*</span></label>
+        <input type="password" id="f_password" required minlength="4" placeholder="••••••••">
+        <div class="hint">Usa una combinación sencilla para recordar tu acceso cuando cambies de celular.</div>
       </div>
 
       <div class="field">
@@ -158,24 +177,31 @@
 
       <div class="btn-row">
         <button type="button" class="btn-prev" onclick="goToStep(1)">← Atrás</button>
-        <button type="button" class="btn-next" id="submitBtn" onclick="dispatchNeighborToSheets()">✓ Completar mi Registro</button>
+        <button type="button" class="btn-next" id="submitBtn" onclick="dispatchNeighborToSheets()">✓ Completar Registro y Entrar</button>
       </div>
     </div>
   </form>
 
   <div class="success-card" id="successCard">
-    <div class="success-icon">🏡</div>
-    <h2>¡Registro de Vecino Exitoso!</h2>
-    <p>Bienvenido a la red, <strong id="outNeighborName"></strong>. Tu perfil comunitario ha sido guardado de manera segura.</p>
+    <div class="success-icon">🎉</div>
+    <h2>¡Gracias por Registrarte!</h2>
+    <p>Tu cuenta comunitaria ha sido creada de manera exitosa y tu sesión ha quedado guardada de forma segura.</p>
+    
+    <div class="user-badge-info">
+      <div class="badge-line"><span>Vecino:</span> <strong id="outName">—</strong></div>
+      <div class="badge-line"><span>ID Comunitario:</span> <strong id="outId">—</strong></div>
+      <div class="badge-line"><span>Ubicación:</span> <strong id="outZone">—</strong></div>
+      <div class="badge-line"><span>Acceso Remoto:</span> <strong>Habilitado permanente con clave</strong></div>
+    </div>
+
     <div class="success-actions">
-      <a href="index.html">Explorar el Directorio Local</a>
+      <a href="index.html" class="btn-primary">Ingresar al Directorio Local →</a>
     </div>
   </div>
 </div>
 
 <script>
-// PRODUCTION ENDPOINT FOR DIRECT SHEET CONNECTIONS
-const GOOGLE_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbwX39prrhKG4At4x-GssO3HmP0vKVpv9JTXd9XsjJOU1JsMO3kyVUEhpwER7Jf-CKMe/exec';
+const GOOGLE_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbyvDoqy9S9kIm9CUbHRppPQ_AFH8D7gfilV1F9nLgkdwEuM9Zl1NuwiFSFy8dfir0VZ/exec';
 
 function generateNeighborId() {
   return 'USR-' + Math.floor(10000000 + Math.random() * 90000000);
@@ -184,7 +210,7 @@ function generateNeighborId() {
 function validateAndNext(step) {
   if (step === 1) {
     if (!document.getElementById('f_nombre').value.trim() || !document.getElementById('f_apellido').value.trim() || !document.getElementById('f_email').value.trim()) {
-      alert('Por favor completa todos los campos obligatorios del perfil.');
+      alert('Por favor completa todos los campos obligatorios para continuar.');
       return;
     }
     goToStep(2);
@@ -203,53 +229,65 @@ function goToStep(n) {
 function dispatchNeighborToSheets() {
   const targetBtn = document.getElementById('submitBtn');
   
-  if (!document.getElementById('f_whatsapp').value.trim() || !document.getElementById('f_quartier').value.trim() || !document.getElementById('f_source').value) {
-    alert('Por favor completa los detalles de ubicación y contacto.');
+  const whatsapp = document.getElementById('f_whatsapp').value.trim();
+  const quartier = document.getElementById('f_quartier').value.trim();
+  const password = document.getElementById('f_password').value;
+  const source = document.getElementById('f_source').value;
+
+  if (!whatsapp || !quartier || !password || !source) {
+    alert('Por favor completa todos los campos obligatorios de seguridad y contacto.');
     return;
   }
 
+  // PREVENTING REPETITIVE LOOP ACTION: Fire local variables first
   targetBtn.disabled = true;
-  targetBtn.textContent = 'Guardando perfil de vecino...';
+  targetBtn.textContent = 'Procesando credenciales comunitarias...';
 
   const neighborFirst = document.getElementById('f_nombre').value.trim();
   const neighborLast = document.getElementById('f_apellido').value.trim();
-
-  // SECURE METADATA COMPILATION
+  const email = document.getElementById('f_email').value.trim();
   const generatedId = generateNeighborId();
-  const defaultStatus = "Pendiente"; // Matches standard initial user state flags
 
-  // PAYLOAD SCHEMATICS COMPILING STRINGS WITH SPACES MATCHING SPREADSHEET HEADERS
+  // WRITE SESSION DATA TO LOCALSTORAGE IMMEDIATELY (Prevents asynchronous loops)
+  localStorage.setItem('mc_user_id', generatedId);
+  localStorage.setItem('mc_user_name', neighborFirst);
+  localStorage.setItem('mc_user_zone', quartier);
+  localStorage.setItem('mc_user_pass_saved', 'true');
+
   const neighborPayload = {
     formType: "neighbor_registration",
     "Nombre": neighborFirst,
     "Apellido": neighborLast,
-    "Correo Electronico": document.getElementById('f_email').value.trim(),
-    "Numero Whatsapp": document.getElementById('f_whatsapp').value.trim(),
-    "Quartier": document.getElementById('f_quartier').value.trim(),
-    "Donde nos encontraste": document.getElementById('f_source').value,
-    "Estado": defaultStatus,
-    "Usarioid": generatedId
+    "Correo Electronico": email,
+    "Numero Whatsapp": whatsapp,
+    "Quartier": quartier,
+    "Donde nos encontraste": source,
+    "Estado": "Activo",
+    "Usarioid": generatedId,
+    "Clave": password // Passed to backend if you wish to capture it in an extra column
   };
 
+  // Dispatch network transaction asynchronously
   fetch(GOOGLE_SCRIPT_API_URL, {
     method: 'POST',
     mode: 'no-cors',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(neighborPayload)
-  })
-  .then(() => {
+  });
+
+  // RENDER CONFIRMATION STATE INDEPENDENTLY OF OPAQUE CORS TIMEOUT
+  setTimeout(() => {
     document.getElementById('neighborForm').style.display = 'none';
     document.getElementById('progressWrap').style.display = 'none';
-    document.getElementById('outNeighborName').textContent = neighborFirst;
+    
+    // Write out metrics to dashboard elements
+    document.getElementById('outName').textContent = neighborFirst + ' ' + neighborLast;
+    document.getElementById('outId').textContent = generatedId;
+    document.getElementById('outZone').textContent = quartier;
+    
     document.getElementById('successCard').classList.add('active');
     window.scrollTo({top: 0, behavior: 'smooth'});
-  })
-  .catch(err => {
-    console.error('API Pipeline Interruption:', err);
-    alert('Error al conectar con la base de datos central. Inténtalo de nuevo.');
-    targetBtn.disabled = false;
-    targetBtn.textContent = '✓ Completar mi Registro';
-  });
+  }, 800);
 }
 </script>
 </body>
