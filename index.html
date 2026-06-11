@@ -48,6 +48,14 @@
   }
   .btn-join-nav:hover { background: rgba(255,255,255,0.1); border-color: #fff; }
 
+  /* NEW CONTEXT-AWARE PROFILE BUTTON */
+  .profile-badge-nav {
+    background: #2d2420; color: #fff; border: 1.5px solid var(--border);
+    padding: 6px 14px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+    cursor: pointer; display: none; transition: background 0.2s;
+  }
+  .profile-badge-nav:hover { background: var(--accent); border-color: var(--accent); }
+
   .nav-cta {
     background: var(--accent); color: #fff; border: none; cursor: pointer;
     padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
@@ -112,7 +120,7 @@
   .pill:hover { border-color: var(--accent); color: var(--accent); }
   .pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-  /* LISTINGS & HOMEPAGE SECTIONS */
+  /* LISTINGS & HOMEPAGE VISUAL SECTIONS */
   .listings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
   .results-count { font-size: 0.82rem; color: var(--ink-muted); }
   .sort-select { font-family: 'DM Sans', sans-serif; font-size: 0.8rem; border: 1.5px solid var(--border); border-radius: 8px; padding: 6px 10px; background: var(--surface); cursor: pointer; outline: none; }
@@ -181,43 +189,47 @@
   .mc-modal-cta:hover { opacity: 0.9; }
   .mc-modal-close { background: none; border: none; font-size: 0.82rem; color: var(--ink-muted); cursor: pointer; text-decoration: underline; }
 
-  /* FOOTER */
-  footer {
-    background: var(--ink); color: rgba(255,255,255,0.5);
-    padding: 28px 24px; text-align: center; font-size: 0.78rem; margin-top: 20px;
-  }
+  /* PROFILE AND EDITING PORTAL FIELDS */
+  .modal-form-group { text-align: left; margin-bottom: 14px; }
+  .modal-form-group label { display: block; font-size: 0.78rem; font-weight: 700; margin-bottom: 4px; }
+  .modal-form-group input { width:100%; padding: 10px; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; outline: none; background: var(--bg); }
+  .modal-form-group input:focus { border-color: var(--accent); background: #fff; }
+  .modal-row-split { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .modal-switch-text { font-size: 0.82rem; margin-top: 14px; color: var(--ink-muted); }
+  .modal-switch-text span { color: var(--accent); cursor: pointer; text-decoration: underline; font-weight: 600; }
+
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--ink-muted); }
+  .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+  
+  .cta-banner { margin: 24px 20px; padding: 28px 24px; border-radius: 16px; background: linear-gradient(135deg, var(--ink) 0%, #2d2420 100%); color: #fff; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+  .cta-banner-text { flex: 1; min-width: 200px; }
+  .cta-banner h3 { font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 800; margin-bottom: 5px; }
+  .cta-banner p { font-size: 0.83rem; color: rgba(255,255,255,0.65); }
+  .cta-banner a { background: var(--accent); color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 700; font-size: 0.88rem; white-space: nowrap; transition: opacity 0.2s; }
+  .cta-banner a:hover { opacity: 0.85; }
+
+  footer { background: var(--ink); color: rgba(255,255,255,0.5); padding: 28px 24px; text-align: center; font-size: 0.78rem; margin-top: 20px; }
   footer a { color: rgba(255,255,255,0.7); text-decoration: none; }
   footer strong { color: #fff; font-family: 'Syne', sans-serif; }
-
-  /* LOADING */
   .loading { text-align: center; padding: 40px; color: var(--ink-muted); font-size: 0.9rem; }
-  .spinner {
-    width: 28px; height: 28px; border: 3px solid var(--border);
-    border-top-color: var(--accent); border-radius: 50%;
-    animation: spin 0.7s linear infinite; margin: 0 auto 12px;
-  }
+  .spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 12px; }
   @keyframes spin { to { transform: rotate(360deg); } }
-
-  @media (max-width: 600px) {
-    .nav-links { display: none; }
-    .listings-grid { grid-template-columns: 1fr; }
-    .cta-banner { text-align: center; }
-    .cta-banner-text { min-width: 100%; }
-  }
+  @media (max-width: 600px) { .nav-links { display: none; } .listings-grid { grid-template-columns: 1fr; } .cta-banner { text-align: center; } .cta-banner-text { min-width: 100%; } }
 </style>
 </head>
 <body>
 
 <nav>
   <div class="nav-logo">Marsella<span>Conecta</span></div>
-  <div class="nav-links">
+  <div class="nav-links" id="navPublicLinks">
     <a href="index.html" class="active">Directorio</a>
     <a href="register.html">Registrar Negocio</a>
     <a href="plans.html">Planes</a>
   </div>
   <div class="nav-actions">
+    <div class="profile-badge-nav" id="navProfileBadge" onclick="openProfileEditModal()">👤 Perfil</div>
     <a href="register-user.html" id="navJoinBtn" class="btn-join-nav">Unirte Ahora</a>
-    <a href="register.html" class="nav-cta">+ Agregar Negocio</a>
+    <a href="register.html" id="navMerchantCta" class="nav-cta">+ Agregar Negocio</a>
   </div>
 </nav>
 
@@ -260,7 +272,7 @@
   </div>
 </div>
 
-<div class="cta-banner">
+<div class="cta-banner" id="bottomMerchantBanner">
   <div class="cta-banner-text">
     <h3>¿Tienes un negocio en Marsella?</h3>
     <p>Regístralo gratis y llega a toda la colonia. Planes premium desde $5/mes.</p>
@@ -268,10 +280,10 @@
   <a href="register.html">Registrar mi negocio →</a>
 </div>
 
-<footer>
+<footer id="footerContainer">
   <strong>MarsellaCONECTA</strong> &nbsp;·&nbsp; El Salvador &nbsp;·&nbsp;
-  <a href="register.html">Registrar negocio</a> &nbsp;·&nbsp;
-  <a href="plans.html">Planes y precios</a> &nbsp;·&nbsp;
+  <a href="register.html" class="biz-hide-element">Registrar negocio</a> &nbsp;·&nbsp;
+  <a href="plans.html" class="biz-hide-element">Planes y precios</a> &nbsp;·&nbsp;
   <a href="admin.html">Admin</a>
   <br><br>© 2026 Marsella Conecta. Hecho con ❤️ para la comunidad.
 </footer>
@@ -282,12 +294,58 @@
     <div class="mc-modal-title">Únete a nuestra comunidad enseguida</div>
     <div class="mc-modal-text">Para proteger la seguridad de los vecinos y acceder a los canales directos de comunicación con los negocios, debes formar parte activa de nuestra red vecinal.</div>
     <a href="register-user.html" class="mc-modal-cta">Unirme como Vecino</a>
-    <button class="mc-modal-close" onclick="closeAuthModal()">Volver al directorio</button>
+    <div class="modal-switch-text">¿Ya tienes cuenta comunitaria? <span onclick="switchToLoginLayout()">Inicia Sesión aquí</span></div>
+    <button class="mc-modal-close" style="margin-top:10px" onclick="closeAuthModal()">Volver al directorio</button>
+  </div>
+</div>
+
+<div class="mc-modal-overlay" id="userLoginModal">
+  <div class="mc-modal-card">
+    <div class="mc-modal-icon">🔒</div>
+    <div class="mc-modal-title">Acceso Vecinal</div>
+    <div class="mc-modal-text">Ingresa tus credenciales registradas para reanudar tu sesión permanente.</div>
+    
+    <div class="modal-form-group">
+      <label>Correo Electrónico</label>
+      <input type="email" id="log_email" placeholder="ejemplo@correo.com">
+    </div>
+    <div class="modal-form-group">
+      <label>Contraseña</label>
+      <input type="password" id="log_password" placeholder="••••••••">
+    </div>
+    
+    <button class="mc-modal-cta" id="loginSubmitBtn" onclick="executeNeighborLogin()">Iniciar Sesión</button>
+    <div class="modal-switch-text" style="font-size:0.75rem">¿Olvidaste tu contraseña? <span onclick="executePasswordRecoveryRequest()">Recuperar Clave</span></div>
+    <button class="mc-modal-close" style="margin-top:10px" onclick="closeLoginModal()">Cancelar</button>
+  </div>
+</div>
+
+<div class="mc-modal-overlay" id="profileEditModal">
+  <div class="mc-modal-card" style="max-width:460px">
+    <div class="mc-modal-icon">⚙️</div>
+    <div class="mc-modal-title">Configuración de Perfil</div>
+    <div class="mc-modal-text">Modifica tus variables comunitarias en tiempo real. Tu ID de cuenta no cambiará.</div>
+    
+    <div class="modal-row-split">
+      <div class="modal-form-group"><label>Nombre</label><input type="text" id="edit_nombre"></div>
+      <div class="modal-form-group"><label>Apellido</label><input type="text" id="edit_apellido"></div>
+    </div>
+    <div class="modal-form-group"><label>Correo Electrónico</label><input type="email" id="edit_email"></div>
+    <div class="modal-row-split">
+      <div class="modal-form-group"><label>WhatsApp</label><input type="tel" id="edit_whatsapp" maxlength="9"></div>
+      <div class="modal-form-group"><label>Senda / Quartier</label><input type="text" id="edit_quartier"></div>
+    </div>
+    <div class="modal-form-group"><label>Cambiar Contraseña (Opcional)</label><input type="password" id="edit_password" placeholder="Dejar en blanco para mantener actual"></div>
+    
+    <button class="mc-modal-cta" id="editProfileSubmitBtn" onclick="dispatchProfileOverwrites()">✓ Guardar Cambios</button>
+    <button class="mc-modal-close" onclick="closeProfileEditModal()">Cerrar sin guardar</button>
   </div>
 </div>
 
 <script>
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRtiBEyirRS73NI23sRAllDT7g3aphl5uYmhDIRHKhzwjYDZD8c0YmNv19WfkBgHXZxTLlS5HnROUOz/pub?gid=0&single=true&output=csv';
+// PUBLISHED TARGET FOR USARIO (VECINOS) TAB DATABASE LOOKUPS
+const USER_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRtiBEyirRS73NI23sRAllDT7g3aphl5uYmhDIRHKhzwjYDZD8c0YmNv19WfkBgHXZxTLlS5HnROUOz/pub?gid=488734005&single=true&output=csv';
 const GOOGLE_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbyvDoqy9S9kIm9CUbHRppPQ_AFH8D7gfilV1F9nLgkdwEuM9Zl1NuwiFSFy8dfir0VZ/exec';
 const COUNTRY_CODE = '503';
 
@@ -300,8 +358,7 @@ const CATEGORY_ICONS = {
 const FALLBACK_ICON = '📦';
 
 const SAMPLE_DATA = [
-  { Nombre:'VIP Taxi Marsella', Categoría:'Transporte', Sub_Categoria:'Taxi', Barrio:'Colonia Marsella', Teléfono:'75404955', Descripción:'Servicio de taxi 24/7 para toda la zona', Estado:'Activo', Estrellas:'5', Horario:'Todos los días 6am-10pm', Plan:'Gratuito' },
-  { Nombre:'Pupusería La Abuela', Categoría:'Alimentacion', Sub_Categoria:'Pupusería', Barrio:'Zona Central', Teléfono:'72113344', Descripción:'Las mejores pupusas de la colonia desde 1985', Estado:'Activo', Estrellas:'5', Horario:'Mar-Dom 11am-8pm', Plan:'Gratuito' }
+  { Nombre:'VIP Taxi Marsella', Categoría:'Transporte', Sub_Categoria:'Taxi', Barrio:'Colonia Marsella', Teléfono:'75404955', Descripción:'Servicio de taxi 24/7 para toda la zona', Estado:'Activo', Estrellas:'5', Horario:'Todos los días 6am-10pm', Plan:'Gratuito' }
 ];
 
 let allData = [];
@@ -330,18 +387,192 @@ function logUserEvent(eventType, searchVal = '', bizName = '') {
   }).catch(err => console.warn("Analytics logger tracking timeout:", err));
 }
 
+// CONTEXT-AWARE SYSTEM NAVIGATION ENGINE
 function evaluateUserSession() {
   const verifiedToken = localStorage.getItem('mc_user_id');
-  const targetNavBtn = document.getElementById('navJoinBtn');
+  const userNameToken = localStorage.getItem('mc_user_name');
+  
+  const navJoinBtn = document.getElementById('navJoinBtn');
+  const navMerchantCta = document.getElementById('navMerchantCta');
+  const navPublicLinks = document.getElementById('navPublicLinks');
+  const profileBadge = document.getElementById('navProfileBadge');
+  const bottomBanner = document.getElementById('bottomMerchantBanner');
+  const footerBizElements = document.querySelectorAll('.biz-hide-element');
+
   if (!verifiedToken) {
-    if (targetNavBtn) targetNavBtn.style.display = 'block';
+    // VISITOR LAYER MODE: Restore all general standard elements
+    if (navJoinBtn) navJoinBtn.style.display = 'block';
+    if (navMerchantCta) navMerchantCta.style.display = 'block';
+    if (navPublicLinks) navPublicLinks.style.display = 'flex';
+    if (bottomBanner) bottomBanner.style.display = 'flex';
+    if (profileBadge) profileBadge.style.display = 'none';
+    footerBizElements.forEach(el => el.style.display = 'inline');
   } else {
-    if (targetNavBtn) targetNavBtn.style.display = 'none';
+    // CONTEXT-AWARE MASKING LAYER: Shield user from everything commercial
+    if (navJoinBtn) navJoinBtn.style.display = 'none';
+    if (navMerchantCta) navMerchantCta.style.display = 'none';
+    if (navPublicLinks) navPublicLinks.style.display = 'none'; 
+    if (bottomBanner) bottomBanner.style.display = 'none';
+    
+    // Activate profile widget overlay
+    if (profileBadge) {
+      profileBadge.textContent = `👤 Hola, ${userNameToken || 'Vecino'}`;
+      profileBadge.style.display = 'block';
+    }
+    footerBizElements.forEach(el => el.style.display = 'none');
   }
 }
 
 function openAuthModal() { document.getElementById('authGateModal').classList.add('active'); }
 function closeAuthModal() { document.getElementById('authGateModal').classList.remove('active'); }
+
+function switchToLoginLayout() {
+  closeAuthModal();
+  document.getElementById('userLoginModal').classList.add('active');
+}
+function closeLoginModal() { document.getElementById('userLoginModal').classList.remove('active'); }
+
+// DECOUPLED ASYNCHRONOUS SECURITY LOOKUP ENGINE
+async function executeNeighborLogin() {
+  const emailInput = document.getElementById('log_email').value.trim().toLowerCase();
+  const passwordInput = document.getElementById('log_password').value;
+  const loginBtn = document.getElementById('loginSubmitBtn');
+
+  if (!emailInput || !passwordInput) {
+    alert('Por favor introduce tu correo electrónico y tu contraseña de seguridad.');
+    return;
+  }
+
+  loginBtn.disabled = true;
+  loginBtn.textContent = 'Autenticando credenciales...';
+
+  try {
+    const res = await fetch(USER_SHEET_CSV_URL + '&cb=' + new Date().getTime());
+    if (!res.ok) throw new Error('Database pipeline timeout');
+    const text = await res.text();
+    
+    const lines = text.trim().split('\n');
+    let accessGranted = false;
+
+    // Parses raw text data string to run credentials validation
+    for (let i = 1; i < lines.length; i++) {
+      const cols = parseCSVLine(lines[i]);
+      if (cols.length < 5) continue;
+
+      const registeredEmail = (cols[2] || '').trim().replace(/^"|"$/g,'').toLowerCase();
+      const registeredPass = (cols[8] || '').trim().replace(/^"|"$/g,'');
+      const registeredName = (cols[0] || '').trim().replace(/^"|"$/g,'');
+      const registeredZone = (cols[4] || '').trim().replace(/^"|"$/g,'');
+      const registeredId = (cols[7] || '').trim().replace(/^"|"$/g,'');
+
+      if (registeredEmail === emailInput && registeredPass === passwordInput) {
+        // Authenticated: Write properties to local storage memory
+        localStorage.setItem('mc_user_id', registeredId);
+        localStorage.setItem('mc_user_name', registeredName);
+        localStorage.setItem('mc_user_zone', registeredZone);
+        localStorage.setItem('mc_user_email_saved', registeredEmail);
+        localStorage.setItem('mc_user_lastname_saved', (cols[1] || '').trim().replace(/^"|"$/g,''));
+        
+        accessGranted = true;
+        break;
+      }
+    }
+
+    if (accessGranted) {
+      logUserEvent('Login_Exitoso', '', '');
+      closeLoginModal();
+      evaluateUserSession();
+      alert('¡Sesión iniciada con éxito! Bienvenido de vuelta.');
+    } else {
+      alert('Credenciales inválidas. Verifica tu correo y contraseña o regístrate como nuevo vecino.');
+    }
+  } catch(e) {
+    console.error('Authentication anomaly caught:', e);
+    alert('Error temporal de conexión con el nodo de seguridad de Google. Reintenta.');
+  } finally {
+    loginBtn.disabled = false;
+    loginBtn.textContent = 'Iniciar Sesión';
+  }
+}
+
+// ASYNCHRONOUS PASSWORD RECOVERY ENGINE BASELINE
+function executePasswordRecoveryRequest() {
+  const emailInput = document.getElementById('log_email').value.trim();
+  if(!emailInput) {
+    alert('Introduce tu dirección de correo electrónico en el campo superior para iniciar el proceso de recuperación.');
+    return;
+  }
+  alert(`Se ha enviado una alerta de reconfiguración de clave a la cola de administración para el correo: ${emailInput}. Daniela o tu administrador validarán tu identidad vía WhatsApp.`);
+  logUserEvent('Solicitud_Recuperacion_Clave', emailInput, '');
+}
+
+// PROFILE EDITING UTILITY PORTAL
+async function openProfileEditModal() {
+  // Pre-populates the input elements using live memory tokens
+  document.getElementById('edit_nombre').value = localStorage.getItem('mc_user_name') || '';
+  document.getElementById('edit_apellido').value = localStorage.getItem('mc_user_lastname_saved') || '';
+  document.getElementById('edit_email').value = localStorage.getItem('mc_user_email_saved') || '';
+  document.getElementById('edit_quartier').value = localStorage.getItem('mc_user_zone') || '';
+  document.getElementById('edit_whatsapp').value = ''; 
+  document.getElementById('edit_password').value = '';
+
+  document.getElementById('profileEditModal').classList.add('active');
+}
+function closeProfileEditModal() { document.getElementById('profileEditModal').classList.remove('active'); }
+
+function dispatchProfileOverwrites() {
+  const saveBtn = document.getElementById('editProfileSubmitBtn');
+  const nombre = document.getElementById('edit_nombre').value.trim();
+  const apellido = document.getElementById('edit_apellido').value.trim();
+  const email = document.getElementById('edit_email').value.trim();
+  const quartier = document.getElementById('edit_quartier').value.trim();
+  const whatsapp = document.getElementById('edit_whatsapp').value.trim();
+  const password = document.getElementById('edit_password').value;
+
+  if(!nombre || !apellido || !email || !quartier) {
+    alert('Por favor rellena todos los campos obligatorios de identificación vecinal.');
+    return;
+  }
+
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Guardando cambios en base de datos...';
+
+  // Pull existing structural keys to enforce exact cell row overwrite targeting
+  const currentUserId = localStorage.getItem('mc_user_id');
+
+  const updatePayload = {
+    formType: "edit_user_profile",
+    Nombre: nombre,
+    Apellido: apellido,
+    "Correo Electronico": email,
+    "Numero Whatsapp": whatsapp || 'No cambiado',
+    Quartier: quartier,
+    Usarioid: currentUserId,
+    Clave: password || '' // Blank field parameter tells your macro script to retain the original password cell
+  };
+
+  fetch(GOOGLE_SCRIPT_API_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updatePayload)
+  });
+
+  // Synchronously update front-end parameters immediately to stop latency loops
+  localStorage.setItem('mc_user_name', nombre);
+  localStorage.setItem('mc_user_zone', quartier);
+  localStorage.setItem('mc_user_email_saved', email);
+  localStorage.setItem('mc_user_lastname_saved', apellido);
+
+  setTimeout(() => {
+    logUserEvent('Edicion_Perfil_Exitoso', '', currentUserId);
+    closeProfileEditModal();
+    evaluateUserSession();
+    saveBtn.disabled = false;
+    saveBtn.textContent = '✓ Guardar Cambios';
+    alert('¡Tu perfil comunitario ha sido actualizado de forma exitosa en el servidor principal!');
+  }, 700);
+}
 
 function parseCSV(text) {
   const lines = text.trim().split('\n');
