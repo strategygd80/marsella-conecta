@@ -175,7 +175,7 @@
   .mc-modal-card {
     background: var(--surface); border-radius: 16px; border: 1.5px solid var(--border);
     padding: 32px; max-width: 420px; width: 90%; text-align: center;
-    box-shadow: 0 10px 32px rgba(26,23,20,0.2); transform: translateY(15px); transition: transform 0.25s ease;
+    box-shadow: 0 10px 32px rgba(26,23,20,0.25); transform: translateY(15px); transition: transform 0.25s ease;
   }
   .mc-modal-overlay.active .mc-modal-card { transform: translateY(0); }
   .mc-modal-icon { font-size: 3.2rem; margin-bottom: 12px; }
@@ -747,7 +747,7 @@ function renderCards() {
   
   let sorted = [...filtered].sort((a,b) => {
     if (sort === 'stars') return (parseFloat(getField(b,'Estrellas'))||0) - (parseFloat(getField(a,'Estrellas'))||0);
-    if (sort === 'name') return getField(a,'Nombre').localeCompare(getField(b,'Nombre'));
+    if (sort === 'name') return getField(a,'Nombre').localeCompare(getField(bLayout,'Nombre'));
     return 0;
   });
 
