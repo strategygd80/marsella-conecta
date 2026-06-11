@@ -175,7 +175,7 @@
   .mc-modal-card {
     background: var(--surface); border-radius: 16px; border: 1.5px solid var(--border);
     padding: 32px; max-width: 420px; width: 90%; text-align: center;
-    box-shadow: 0 10px 32px rgba(26,23,20,0.2); transform: translateY(15px); transition: transform 0.25s ease;
+    box-shadow: 0 10px 32px rgba(26,23,20,0.25); transform: translateY(15px); transition: transform 0.25s ease;
   }
   .mc-modal-overlay.active .mc-modal-card { transform: translateY(0); }
   .mc-modal-icon { font-size: 3.2rem; margin-bottom: 12px; }
@@ -256,7 +256,6 @@
 <div class="stats-bar">
   <div class="stat-item"><div class="stat-num" id="totalBiz">—</div><div class="stat-label">Negocios</div></div>
   <div class="stat-item"><div class="stat-num" id="totalCat">—</div><div class="stat-label">Categorías</div></div>
-  <div class="stat-item"><div class="stat-num" id="totalVer">—</div><div class="stat-label">Verificados</div></div>
   <div class="stat-item"><div class="stat-num">🇸🇻</div><div class="stat-label">El Salvador</div></div>
 </div>
 
@@ -684,7 +683,7 @@ function applyFilters() {
       getField(r,'Barrio'),
       getField(r,'Descripción'),
       getField(r,'Horario'),
-      getField(rpx,'Servicio Otro')
+      getField(r,'Servicio Otro')
     ].join(' ').toLowerCase();
     
     let implicitMatch = false;
