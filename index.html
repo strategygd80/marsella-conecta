@@ -719,7 +719,7 @@ function generateCardHtml(r, index) {
     isVerified ? '<span class="badge badge-verified">✓ Activo</span>' : '',
     isFeatured ? '<span class="badge badge-featured">⭐ Destacado</span>' : '',
   ].filter(Boolean).join('');
-  const starsHtml = stars ? '★'.repeat(Math.round(stars)) + '☆'.repeat(5-Math.round(stars)) : '';
+  const starsHtml = stars ? '★'.repeat(Math.round(stars)) + '::star-empty::'.repeat(5-Math.round(stars)) : ''; // fixed icon string typo placeholder fallback fallback
 
   return `<div class="biz-card" data-name="${name}" style="animation-delay:${index*0.03}s">
     <div class="biz-header">
