@@ -112,7 +112,7 @@
   .pill:hover { border-color: var(--accent); color: var(--accent); }
   .pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-  /* LISTINGS & HOMEPAGE VISUAL SECTIONS */
+  /* LISTINGS & HOMEPAGE SECTIONS */
   .listings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
   .results-count { font-size: 0.82rem; color: var(--ink-muted); }
   .sort-select { font-family: 'DM Sans', sans-serif; font-size: 0.8rem; border: 1.5px solid var(--border); border-radius: 8px; padding: 6px 10px; background: var(--surface); cursor: pointer; outline: none; }
@@ -281,12 +281,12 @@
 </div>
 
 <script>
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRtiBEyirRS73NI23sRAllDT7g3aphl5uYmhDIRHKhzwjYDZD8c0YmNv19WfkBgHXZxTLlS5HnROUOz/pub?gid=698284721&single=true&output=csv';
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRtiBEyirRS73NI23sRAllDT7g3aphl5uYmhDIRHKhzwjYDZD8c0YmNv19WfkBgHXZxTLlS5HnROUOz/pub?gid=0&single=true&output=csv';
 const GOOGLE_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbyvDoqy9S9kIm9CUbHRppPQ_AFH8D7gfilV1F9nLgkdwEuM9Zl1NuwiFSFy8dfir0VZ/exec';
 const COUNTRY_CODE = '503';
 
 const CATEGORY_ICONS = {
-  'Taxi': '🚕', 'Transporte': '🚕', 'Comida': '🍴', 'Alimentacion': '🍴', 'Servicios Otros': '🔧',
+  'Taxi': '🚕', 'Transporte': '🚕', 'Trasporte': '🚕', 'Comida': '🍴', 'Alimentacion': '🍴', 'Alimetacio': '🍴', 'Servicios Otros': '🔧',
   'Bebidas': '🍺', 'Instalacion AC': '❄️', 'Plomería': '🔩',
   'Electricidad': '⚡', 'Mecánica': '🔨', 'Belleza': '💇',
   'Farmacia': '💊', 'Tienda': '🛒', 'Médico': '🏥', 'Servicios Tecnicos/ Hogar': '🏠'
@@ -321,7 +321,7 @@ function logUserEvent(eventType, searchVal = '', bizName = '') {
     mode: 'no-cors',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(analyticalPayload)
-  }).catch(err => console.warn("Analytics engine timeout:", err));
+  }).catch(err => console.warn("Analytics logger tracking timeout:", err));
 }
 
 function evaluateUserSession() {
@@ -431,7 +431,7 @@ function applyFilters() {
     const matchCat = activeFilter === 'Todos' || getField(r,'Categoría') === activeFilter;
     if (!q) return matchCat;
     
-    // ALGORITHMIC DEEP MULTI-LAYER SEARCH ENGINE (Scans explicit cross-relational indices)
+    // DEEP CROSS-RELATIONAL CATEGORY SCANNING INDEX
     const hay = [
       getField(r,'Nombre'),
       getField(r,'Categoría'),
@@ -444,10 +444,11 @@ function applyFilters() {
       getField(r,'Servicio Otro')
     ].join(' ').toLowerCase();
     
-    // Implicit category mapping fallback logic (e.g., typing "taxi" triggers "transporte")
+    // Synonymous fallback mappings
     let implicitMatch = false;
-    if (q === 'taxi' && hay.includes('transporte')) implicitMatch = true;
-    if (q === 'comida' && hay.includes('alimentacion')) implicitMatch = true;
+    if ((q === 'taxi' || q === 'moto' || q === 'flete') && (hay.includes('transporte') || hay.includes('trasporte'))) implicitMatch = true;
+    if ((q === 'comida' || q === 'pupusa' || q === 'pan' || q === 'bebida') && (hay.includes('alimentacion') || hay.includes('alimetacio'))) implicitMatch = true;
+    if ((q === 'aire' || q === 'clima' || q === 'gotera' || q === 'techo') && (hay.includes('tecnicos') || hay.includes('hogar'))) implicitMatch = true;
     
     return matchCat && (hay.includes(q) || implicitMatch);
   });
@@ -457,7 +458,6 @@ function applyFilters() {
 document.getElementById('searchInput').addEventListener('input', applyFilters);
 document.getElementById('searchInput').addEventListener('keydown', e => e.key==='Enter' && doSearch());
 
-// CARD LOGIC GENERATOR HELPER
 function generateCardHtml(r, index) {
   const name = getField(r,'Nombre');
   const cat = getField(r,'Categoría');
@@ -471,7 +471,7 @@ function generateCardHtml(r, index) {
   const icon = CATEGORY_ICONS[cat] || FALLBACK_ICON;
   const isVerified = ['activo','verificado','active'].includes(status);
   
-  // SECURE TIER-DRIVEN BADGE CONTEXT (No one on Free/Basic gets a badge automatically)
+  // STRATEGIC RESTRUCTURING: Destacado flags trigger exclusively for Pro tiers
   const isFeatured = plan.includes('pro') || plan.includes('premium') || plan.includes('destacado');
   
   const badges = [
@@ -504,11 +504,10 @@ function renderCards() {
   const sort = document.getElementById('sortSelect').value;
   const isSearching = document.getElementById('searchInput').value.trim().length > 0;
   
-  // Sort listings prior to chunk division layout building
   let sorted = [...filtered].sort((a,b) => {
     if (sort === 'stars') return (parseFloat(getField(b,'Estrellas'))||0) - (parseFloat(getField(a,'Estrellas'))||0);
     if (sort === 'name') return getField(a,'Nombre').localeCompare(getField(b,'Nombre'));
-    return 0; // Natural chronological sheet addition order fallback
+    return 0;
   });
 
   document.getElementById('resultsCount').textContent = `${sorted.length} negocio${sorted.length!==1?'s':''} encontrado${sorted.length!==1?'s':''}`;
@@ -519,10 +518,10 @@ function renderCards() {
     return;
   }
 
-  // HOMEPAGE SECTIONS DISPATCHER (Triggers only when viewing 'Todos' without an active search filter query)
+  // SEMANTIC SECTION SPLITTING: Dividiendo el home en "Nuevos Emprendimientos"
   if (activeFilter === 'Todos' && !isSearching) {
-    // Treat the bottom-most 4 sheet items as the newest added entries
     const totalCount = sorted.length;
+    // Slices the last 4 row elements as newest entries
     const newEntrepreneurs = sorted.slice(Math.max(0, totalCount - 4)).reverse();
     const generalDirectory = sorted.slice(0, Math.max(0, totalCount - 4));
     
@@ -542,7 +541,6 @@ function renderCards() {
     
     grid.innerHTML = compiledHtml;
   } else {
-    // Flat structured fallback grid for search arrays or single tab filters
     grid.innerHTML = sorted.map((item, idx) => generateCardHtml(item, idx)).join('');
   }
 }
@@ -559,7 +557,8 @@ function shareBiz(name, tel) {
 
 async function loadData() {
   try {
-    const res = await fetch(SHEET_CSV_URL);
+    // CACHE BUSTER ENGINE: Forces network fetch requests to ignore memory configurations
+    const res = await fetch(SHEET_CSV_URL + '&cb=' + new Date().getTime());
     if (!res.ok) throw new Error('fetch failed');
     const text = await res.text();
     const parsed = parseCSV(text);
