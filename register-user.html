@@ -202,9 +202,20 @@
 
 <script>
 const GOOGLE_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbyvDoqy9S9kIm9CUbHRppPQ_AFH8D7gfilV1F9nLgkdwEuM9Zl1NuwiFSFy8dfir0VZ/exec';
+const USER_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRtiBEyirRS73NI23sRAllDT7g3aphl5uYmhDIRHKhzwjYDZD8c0YmNv19WfkBgHXZxTLlS5HnROUOz/pub?gid=488734005&single=true&output=csv';
 
 function generateNeighborId() {
   return 'USR-' + Math.floor(10000000 + Math.random() * 90000000);
+}
+
+function parseCSVLine(line) {
+  const result = []; let cur = ''; let inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    if (line[i] === '"') { inQ = !inQ; }
+    else if (line[i] === ',' && !inQ) { result.push(cur); cur = ''; }
+    else cur += line[i];
+  }
+  result.push(cur); return result;
 }
 
 function validateAndNext(step) {
@@ -226,38 +237,74 @@ function goToStep(n) {
   window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
-function dispatchNeighborToSheets() {
+// ASYNCHRONOUS DUPLICATES EXCLUSION INTERCEPTOR ENGINE
+async function dispatchNeighborToSheets() {
   const targetBtn = document.getElementById('submitBtn');
   
-  const whatsapp = document.getElementById('f_whatsapp').value.trim();
+  const whatsappInput = document.getElementById('f_whatsapp').value.trim().replace(/\D/g,'');
   const quartier = document.getElementById('f_quartier').value.trim();
   const password = document.getElementById('f_password').value;
   const source = document.getElementById('f_source').value;
+  const emailInput = document.getElementById('f_email').value.trim().toLowerCase();
 
-  if (!whatsapp || !quartier || !password || !source) {
+  if (!whatsappInput || !quartier || !password || !source) {
     alert('Por favor completa todos los campos obligatorios de seguridad y contacto.');
     return;
   }
 
   targetBtn.disabled = true;
-  targetBtn.textContent = 'Procesando credenciales comunitarias...';
+  targetBtn.textContent = 'Verificando exclusión de duplicados...';
 
+  try {
+    // Queries the live database to cross-reference existing entries
+    const res = await fetch(USER_SHEET_CSV_URL + '&cb=' + new Date().getTime());
+    if (!res.ok) throw new Error('Database cross-check anomaly');
+    const text = await res.text();
+    const lines = text.trim().split('\n');
+
+    let duplicateFound = false;
+    let duplicateType = '';
+
+    for (let i = 1; i < lines.length; i++) {
+      const cols = parseCSVLine(lines[i]);
+      if (cols.length < 4) continue;
+
+      const existingEmail = (cols[2] || '').trim().replace(/^"|"$/g,'').toLowerCase();
+      const existingPhone = (cols[3] || '').trim().replace(/^"|"$/g,'').replace(/\D/g,'');
+
+      if (existingEmail === emailInput) { duplicateFound = true; duplicateType = 'correo electrónico'; break; }
+      if (existingPhone === whatsappInput) { duplicateFound = true; duplicateType = 'número de WhatsApp'; break; }
+    }
+
+    if (duplicateFound) {
+      alert(`⚠️ Error de duplicado: Este ${duplicateType} ya se encuentra registrado en Marsella Conecta. Si ya eres miembro, por favor usa la opción de Iniciar Sesión.`);
+      targetBtn.disabled = false;
+      targetBtn.textContent = '✓ Completar Registro y Entrar';
+      return;
+    }
+
+  } catch(err) {
+    console.warn("Bypassing duplicate cross-check due to structural latency:", err);
+  }
+
+  targetBtn.textContent = 'Procesando credenciales comunitarias...';
   const neighborFirst = document.getElementById('f_nombre').value.trim();
   const neighborLast = document.getElementById('f_apellido').value.trim();
-  const email = document.getElementById('f_email').value.trim();
   const generatedId = generateNeighborId();
 
-  // FORCE IMMEDIATELY SYNCHRONOUS PERSISTENT LOG IN (Guarantees infinite loops are completely broken)
+  // FORCE IMMEDIATELY SYNCHRONOUS PERSISTENT LOG IN
   localStorage.setItem('mc_user_id', generatedId);
   localStorage.setItem('mc_user_name', neighborFirst);
   localStorage.setItem('mc_user_zone', quartier);
+  localStorage.setItem('mc_user_email_saved', emailInput);
+  localStorage.setItem('mc_user_lastname_saved', neighborLast);
 
   const neighborPayload = {
     formType: "neighbor_registration",
     "Nombre": neighborFirst,
     "Apellido": neighborLast,
-    "Correo Electronico": email,
-    "Numero Whatsapp": whatsapp,
+    "Correo Electronico": emailInput,
+    "Numero Whatsapp": whatsappInput,
     "Quartier": quartier,
     "Donde nos encontraste": source,
     "Estado": "Activo",
@@ -265,7 +312,6 @@ function dispatchNeighborToSheets() {
     "Clave": password
   };
 
-  // Dispatch the form payload safely to the script webhook
   fetch(GOOGLE_SCRIPT_API_URL, {
     method: 'POST',
     mode: 'no-cors',
@@ -273,7 +319,6 @@ function dispatchNeighborToSheets() {
     body: JSON.stringify(neighborPayload)
   });
 
-  // Render the local confirmation dashboard card
   setTimeout(() => {
     document.getElementById('neighborForm').style.display = 'none';
     document.getElementById('progressWrap').style.display = 'none';
