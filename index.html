@@ -175,7 +175,7 @@
   .mc-modal-card {
     background: var(--surface); border-radius: 16px; border: 1.5px solid var(--border);
     padding: 32px; max-width: 420px; width: 90%; text-align: center;
-    box-shadow: 0 10px 32px rgba(26,23,20,0.25); transform: translateY(15px); transition: transform 0.25s ease;
+    box-shadow: 0 10px 32px rgba(26,23,20,0.2); transform: translateY(15px); transition: transform 0.25s ease;
   }
   .mc-modal-overlay.active .mc-modal-card { transform: translateY(0); }
   .mc-modal-icon { font-size: 3.2rem; margin-bottom: 12px; }
@@ -356,7 +356,7 @@
 
 <script>
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRtiBEyirRS73NI23sRAllDT7g3aphl5uYmhDIRHKhzwjYDZD8c0YmNv19WfkBgHXZxTLlS5HnROUOz/pub?gid=0&single=true&output=csv';
-const USER_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRtiBEyirRS73NI23sRAllDT7g3aphl5uYmhDIRHKhzwjYDZD8c0YmNv19WfkBgHXZxTLlS5HnROUOz/pub?gid=488734005&single=true&output=csv';
+const USER_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRtiBEyirRS73NI23sRAllDT7g3aphl5uYmhDIRHKhzwjYDZD8c0YmNv19WfkBgHXZxTLlS5HnROUOz/pub?gid=596180293&single=true&output=csv';
 const GOOGLE_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbyvDoqy9S9kIm9CUbHRppPQ_AFH8D7gfilV1F9nLgkdwEuM9Zl1NuwiFSFy8dfir0VZ/exec';
 const COUNTRY_CODE = '503';
 
@@ -469,8 +469,9 @@ async function executeNeighborLogin() {
     let accessGranted = false;
 
     for (let i = 1; i < lines.length; i++) {
+      if (!lines[i].trim()) continue;
       const cols = parseCSVLine(lines[i]);
-      if (cols.length < 5) continue;
+      if (cols.length < 8) continue;
 
       const registeredEmail = (cols[2] || '').trim().replace(/^"|"$/g,'').toLowerCase();
       const registeredPass = (cols[8] || '').trim().replace(/^"|"$/g,'');
@@ -500,7 +501,7 @@ async function executeNeighborLogin() {
     }
   } catch(e) {
     console.error('Authentication anomaly caught:', e);
-    alert('Error temporal de conexión con el nodo de seguridad de Google. Reintenta.');
+    alert('Error de conexión: No se pudo descargar la lista de vecinos autorizados.');
   } finally {
     loginBtn.disabled = false;
     loginBtn.textContent = 'Iniciar Sesión';
@@ -603,7 +604,7 @@ function parseCSVLine(line) {
   const result = []; let cur = ''; let inQ = false;
   for (let i = 0; i < line.length; i++) {
     if (line[i] === '"') { inQ = !inQ; }
-    else if (line[i] === ',' && !inQ) { result.push(cur); cur = ''; }
+    else if (line[i] === ',' && !inQ) { result.push(result); cur = ''; }
     else cur += line[i];
   }
   result.push(cur); return result;
@@ -640,6 +641,17 @@ function renderCategories() {
     d.onclick = () => setFilter(cat);
     grid.appendChild(d);
   });
+}
+
+// Fixed nested line references to array scopes
+function parseCSVLine(line) {
+  const result = []; let cur = ''; let inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    if (line[i] === '"') { inQ = !inQ; }
+    else if (line[i] === ',' && !inQ) { result.push(cur); cur = ''; }
+    else cur += line[i];
+  }
+  result.push(cur); return result;
 }
 
 function renderPills() {
@@ -735,7 +747,7 @@ function generateCardHtml(r, index) {
     ${starsHtml?`<div class="biz-stars">${starsHtml} ${stars}/5</div>`:''}
     <div class="biz-actions">
       ${tel?`<a class="btn-call" href="tel:+${COUNTRY_CODE}${tel}">📞 Llamar</a>`:''}
-      ${tel?`<a class="btn-wa" href="https://wa.me/${COUNTRY_CODE}${tel}" target="_blank">💬 WhatsApp</a>`:''}
+      ${tel?`<a class="btn-wa" href="https://wa.me/#${COUNTRY_CODE}${tel}" target="_blank">💬 WhatsApp</a>`:''}
       <button class="btn-share" onclick="shareBiz('${name}','${tel}')" title="Compartir">⬆️</button>
     </div>
   </div>`;
@@ -747,7 +759,7 @@ function renderCards() {
   
   let sorted = [...filtered].sort((a,b) => {
     if (sort === 'stars') return (parseFloat(getField(b,'Estrellas'))||0) - (parseFloat(getField(a,'Estrellas'))||0);
-    if (sort === 'name') return getField(a,'Nombre').localeCompare(getField(bLayout,'Nombre'));
+    if (sort === 'name') return getField(a,'Nombre').localeCompare(getField(b,'Nombre'));
     return 0;
   });
 
