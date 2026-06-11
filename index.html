@@ -181,23 +181,29 @@
   .mc-modal-cta:hover { opacity: 0.9; }
   .mc-modal-close { background: none; border: none; font-size: 0.82rem; color: var(--ink-muted); cursor: pointer; text-decoration: underline; }
 
-  .empty-state { text-align: center; padding: 60px 20px; color: var(--ink-muted); }
-  .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
-  
-  .cta-banner { margin: 24px 20px; padding: 28px 24px; border-radius: 16px; background: linear-gradient(135deg, var(--ink) 0%, #2d2420 100%); color: #fff; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
-  .cta-banner-text { flex: 1; min-width: 200px; }
-  .cta-banner h3 { font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 800; margin-bottom: 5px; }
-  .cta-banner p { font-size: 0.83rem; color: rgba(255,255,255,0.65); }
-  .cta-banner a { background: var(--accent); color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 700; font-size: 0.88rem; white-space: nowrap; transition: opacity 0.2s; }
-  .cta-banner a:hover { opacity: 0.85; }
-
-  footer { background: var(--ink); color: rgba(255,255,255,0.5); padding: 28px 24px; text-align: center; font-size: 0.78rem; margin-top: 20px; }
+  /* FOOTER */
+  footer {
+    background: var(--ink); color: rgba(255,255,255,0.5);
+    padding: 28px 24px; text-align: center; font-size: 0.78rem; margin-top: 20px;
+  }
   footer a { color: rgba(255,255,255,0.7); text-decoration: none; }
   footer strong { color: #fff; font-family: 'Syne', sans-serif; }
+
+  /* LOADING */
   .loading { text-align: center; padding: 40px; color: var(--ink-muted); font-size: 0.9rem; }
-  .spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 12px; }
+  .spinner {
+    width: 28px; height: 28px; border: 3px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin 0.7s linear infinite; margin: 0 auto 12px;
+  }
   @keyframes spin { to { transform: rotate(360deg); } }
-  @media (max-width: 600px) { .nav-links { display: none; } .listings-grid { grid-template-columns: 1fr; } .cta-banner { text-align: center; } .cta-banner-text { min-width: 100%; } }
+
+  @media (max-width: 600px) {
+    .nav-links { display: none; }
+    .listings-grid { grid-template-columns: 1fr; }
+    .cta-banner { text-align: center; }
+    .cta-banner-text { min-width: 100%; }
+  }
 </style>
 </head>
 <body>
@@ -431,7 +437,6 @@ function applyFilters() {
     const matchCat = activeFilter === 'Todos' || getField(r,'Categoría') === activeFilter;
     if (!q) return matchCat;
     
-    // DEEP CROSS-RELATIONAL CATEGORY SCANNING INDEX
     const hay = [
       getField(r,'Nombre'),
       getField(r,'Categoría'),
@@ -444,7 +449,6 @@ function applyFilters() {
       getField(r,'Servicio Otro')
     ].join(' ').toLowerCase();
     
-    // Synonymous fallback mappings
     let implicitMatch = false;
     if ((q === 'taxi' || q === 'moto' || q === 'flete') && (hay.includes('transporte') || hay.includes('trasporte'))) implicitMatch = true;
     if ((q === 'comida' || q === 'pupusa' || q === 'pan' || q === 'bebida') && (hay.includes('alimentacion') || hay.includes('alimetacio'))) implicitMatch = true;
@@ -471,7 +475,6 @@ function generateCardHtml(r, index) {
   const icon = CATEGORY_ICONS[cat] || FALLBACK_ICON;
   const isVerified = ['activo','verificado','active'].includes(status);
   
-  // STRATEGIC RESTRUCTURING: Destacado flags trigger exclusively for Pro tiers
   const isFeatured = plan.includes('pro') || plan.includes('premium') || plan.includes('destacado');
   
   const badges = [
@@ -518,10 +521,8 @@ function renderCards() {
     return;
   }
 
-  // SEMANTIC SECTION SPLITTING: Dividiendo el home en "Nuevos Emprendimientos"
   if (activeFilter === 'Todos' && !isSearching) {
     const totalCount = sorted.length;
-    // Slices the last 4 row elements as newest entries
     const newEntrepreneurs = sorted.slice(Math.max(0, totalCount - 4)).reverse();
     const generalDirectory = sorted.slice(0, Math.max(0, totalCount - 4));
     
@@ -557,7 +558,6 @@ function shareBiz(name, tel) {
 
 async function loadData() {
   try {
-    // CACHE BUSTER ENGINE: Forces network fetch requests to ignore memory configurations
     const res = await fetch(SHEET_CSV_URL + '&cb=' + new Date().getTime());
     if (!res.ok) throw new Error('fetch failed');
     const text = await res.text();
