@@ -70,7 +70,7 @@
   .btn-next:hover { opacity: 0.85; transform: translateY(-1px); }
   .btn-next:disabled { background: var(--ink-muted); cursor: not-allowed; opacity: 0.6; }
 
-  /* SUCCESS SIGNUP CARD DISPLAY */
+  /* SUCCESS CARD DISPLAY */
   .success-card { text-align: center; padding: 48px 32px; background: var(--surface); border-radius: 16px; border: 1.5px solid var(--border); display: none; }
   .success-card.active { display: block; animation: slideIn 0.4s ease; }
   .success-icon { font-size: 3.8rem; margin-bottom: 16px; }
@@ -114,7 +114,7 @@
   <form id="neighborForm" onsubmit="event.preventDefault();">
     
     <div class="form-card active" id="card1">
-      <div class="card-eyebrow">Pauto-Paso 1 de 2</div>
+      <div class="card-eyebrow">Paso 1 de 2</div>
       <div class="card-title">Únete como Vecino</div>
       <div class="card-sub">Crea tu perfil comunitario para conectar con los servicios de tu colonia.</div>
 
@@ -159,7 +159,7 @@
       <div class="field">
         <label>Asigna tu Contraseña <span class="req">*</span></label>
         <input type="password" id="f_password" required minlength="4" placeholder="••••••••">
-        <div class="hint">Usa una combinación sencilla para recordar tu acceso cuando cambies de celular.</div>
+        <div class="hint">Usa una combinación sencilla para recordar tu acceso cuando cambies de dispositivo.</div>
       </div>
 
       <div class="field">
@@ -191,7 +191,7 @@
       <div class="badge-line"><span>Vecino:</span> <strong id="outName">—</strong></div>
       <div class="badge-line"><span>ID Comunitario:</span> <strong id="outId">—</strong></div>
       <div class="badge-line"><span>Ubicación:</span> <strong id="outZone">—</strong></div>
-      <div class="badge-line"><span>Acceso Remoto:</span> <strong>Habilitado permanente con clave</strong></div>
+      <div class="badge-line"><span>Acceso de Seguridad:</span> <strong>Clave configurada correctamente</strong></div>
     </div>
 
     <div class="success-actions">
@@ -239,7 +239,6 @@ function dispatchNeighborToSheets() {
     return;
   }
 
-  // PREVENTING REPETITIVE LOOP ACTION: Fire local variables first
   targetBtn.disabled = true;
   targetBtn.textContent = 'Procesando credenciales comunitarias...';
 
@@ -248,11 +247,10 @@ function dispatchNeighborToSheets() {
   const email = document.getElementById('f_email').value.trim();
   const generatedId = generateNeighborId();
 
-  // WRITE SESSION DATA TO LOCALSTORAGE IMMEDIATELY (Prevents asynchronous loops)
+  // FORCE IMMEDIATELY SYNCHRONOUS PERSISTENT LOG IN (Guarantees the infinite loops are broken)
   localStorage.setItem('mc_user_id', generatedId);
   localStorage.setItem('mc_user_name', neighborFirst);
   localStorage.setItem('mc_user_zone', quartier);
-  localStorage.setItem('mc_user_pass_saved', 'true');
 
   const neighborPayload = {
     formType: "neighbor_registration",
@@ -264,10 +262,10 @@ function dispatchNeighborToSheets() {
     "Donde nos encontraste": source,
     "Estado": "Activo",
     "Usarioid": generatedId,
-    "Clave": password // Passed to backend if you wish to capture it in an extra column
+    "Clave": password
   };
 
-  // Dispatch network transaction asynchronously
+  // Dispatch the form payload safely to the script webhook
   fetch(GOOGLE_SCRIPT_API_URL, {
     method: 'POST',
     mode: 'no-cors',
@@ -275,19 +273,18 @@ function dispatchNeighborToSheets() {
     body: JSON.stringify(neighborPayload)
   });
 
-  // RENDER CONFIRMATION STATE INDEPENDENTLY OF OPAQUE CORS TIMEOUT
+  // Render the local confirmation dashboard card
   setTimeout(() => {
     document.getElementById('neighborForm').style.display = 'none';
     document.getElementById('progressWrap').style.display = 'none';
     
-    // Write out metrics to dashboard elements
     document.getElementById('outName').textContent = neighborFirst + ' ' + neighborLast;
     document.getElementById('outId').textContent = generatedId;
     document.getElementById('outZone').textContent = quartier;
     
     document.getElementById('successCard').classList.add('active');
     window.scrollTo({top: 0, behavior: 'smooth'});
-  }, 800);
+  }, 600);
 }
 </script>
 </body>
