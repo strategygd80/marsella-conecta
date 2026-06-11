@@ -256,7 +256,6 @@ async function dispatchNeighborToSheets() {
   targetBtn.textContent = 'Verificando exclusión de duplicados...';
 
   try {
-    // Queries the live database to cross-reference existing entries
     const res = await fetch(USER_SHEET_CSV_URL + '&cb=' + new Date().getTime());
     if (!res.ok) throw new Error('Database cross-check anomaly');
     const text = await res.text();
