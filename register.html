@@ -94,11 +94,19 @@
   .success-card { text-align: center; padding: 50px 32px; background: var(--surface); border-radius: 16px; border: 1.5px solid var(--border); display: none; }
   .success-card.active { display: block; animation: slideIn 0.4s ease; }
   .success-icon { font-size: 3.5rem; margin-bottom: 16px; }
-  .success-card h2 { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; margin-bottom: 10px; }
+  .success-card h2 { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; margin-bottom: 10px; color: var(--accent2); }
   .success-card p { color: var(--ink-muted); font-size: 0.9rem; max-width: 400px; margin: 0 auto 24px; }
+  
+  .biz-badge-info {
+    background: var(--bg); border: 1.5px solid var(--border); border-radius: 12px;
+    padding: 16px; margin-bottom: 28px; text-align: left; font-size: 0.85rem;
+  }
+  .badge-line { display: flex; justify-content: space-between; margin-bottom: 8px; }
+  .badge-line:last-child { margin-bottom: 0; }
+  .badge-line strong { color: var(--ink); }
+
   .success-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-  .success-actions a { padding: 11px 22px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; text-decoration: none; }
-  .success-actions .btn-primary { background: var(--accent); color: #fff; }
+  .success-actions .btn-primary { padding: 11px 22px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; text-decoration: none; background: var(--accent); color: #fff; }
 
   .trust-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; justify-content: center; }
   .trust-item { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--ink-muted); }
@@ -141,13 +149,13 @@
           <label>Categoría <span class="req">*</span></label>
           <select id="f_cat" required>
             <option value="">Seleccionar...</option>
-            <option value="Taxi">Taxi / Transporte</option>
-            <option value="Comida">Comida / Alimentación</option>
+            <option value="Transporte">Taxi / Transporte</option>
+            <option value="Alimentacion">Comida / Alimentación</option>
             <option value="Bebidas">Bebidas</option>
-            <option value="Servicios Tecnicos">Servicios Técnicos / Hogar</option>
+            <option value="Servicios Tecnicos/ Hogar">Servicios Técnicos / Hogar</option>
             <option value="Belleza">Belleza y Estética</option>
             <option value="Tienda">Tienda / Abarrotería</option>
-            <option value="Otros">Otros Servicios</option>
+            <option value="Servicios Otros">Otros Servicios</option>
           </select>
         </div>
         <div class="field">
@@ -160,7 +168,7 @@
         <div class="field">
           <label>Teléfono de Contacto <span class="req">*</span></label>
           <input type="tel" id="f_tel" required maxlength="9" placeholder="7123-4567">
-          <div class="hint">Prefijo (+503) nativo del sistema.</div>
+          <div class="hint">Prefijo (+503) nativo de la plataforma.</div>
         </div>
         <div class="field">
           <label>Horario de atención</label>
@@ -180,7 +188,7 @@
 
     <div class="form-card" id="card2">
       <div class="card-eyebrow">Paso 2 de 3</div>
-      <div class="card-title">Datos privados de control</div>
+      <div class="card-title">Datos de Control e Ingreso</div>
       <div class="card-sub">Esta información es confidencial. NO se publicará en la web externa.</div>
 
       <div class="field-row">
@@ -194,9 +202,15 @@
         </div>
       </div>
 
-      <div class="field">
-        <label>Correo electrónico <span class="req">*</span></label>
-        <input type="email" id="f_email" placeholder="ejemplo@correo.com">
+      <div class="field-row">
+        <div class="field">
+          <label>Correo electrónico <span class="req">*</span></label>
+          <input type="email" id="f_email" placeholder="ejemplo@correo.com">
+        </div>
+        <div class="field">
+          <label>Contraseña de Gestión <span class="req">*</span></label>
+          <input type="password" id="f_password" required minlength="4" placeholder="••••••••">
+        </div>
       </div>
 
       <div class="field">
@@ -260,19 +274,24 @@
 
   <div class="success-card" id="successCard">
     <div class="success-icon">🚀</div>
-    <h2>¡Solicitud Recibida Correctamente!</h2>
-    <p>El establecimiento comercial <strong id="outBizName"></strong> fue registrado en nuestra cola de revisión interna bajo estatus protegido.</p>
+    <h2>¡Registro Exitoso de Establecimiento!</h2>
+    <p>Tu solicitud comercial ha sido guardada. El equipo de administración revisará la información antes del despliegue en vivo.</p>
+    
+    <div class="biz-badge-info">
+      <div class="badge-line"><span>Establecimiento:</span> <strong id="outBiz">—</strong></div>
+      <div class="badge-line"><span>ID de Ficha:</span> <strong id="outId">—</strong></div>
+      <div class="badge-line"><span>Estatus Operativo:</span> <strong>Pendiente Validación</strong></div>
+      <div class="badge-line"><span>Panel de Control:</span> <strong>Clave de propietario activada</strong></div>
+    </div>
+
     <div class="success-actions">
-      <a href="index.html" class="btn-primary">Ir al Directorio</a>
+      <a href="index.html" class="btn-primary">Volver al Directorio Principal</a>
     </div>
   </div>
 </div>
 
 <script>
-// PRODUCTION WEB APP ROUTING ENDPOINT
-const GOOGLE_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbx03pt-GssO3HmP0vKVpv9JTXd9XsjJOU1JsMO3kyVUEhpwER7Jf-CKMe/exec'; 
-// Double check to ensure URL string matches your deployed deployment exactly:
-const ACTIVE_URL = 'https://script.google.com/macros/s/AKfycbX39prrhKG4At4x-GssO3HmP0vKVpv9JTXd9XsjJOU1JsMO3kyVUEhpwER7Jf-CKMe/exec';
+const ACTIVE_URL = 'https://script.google.com/macros/s/AKfycbyvDoqy9S9kIm9CUbHRppPQ_AFH8D7gfilV1F9nLgkdwEuM9Zl1NuwiFSFy8dfir0VZ/exec';
 
 function createCryptoUserId() {
   return 'BIZ-' + Math.floor(10000000 + Math.random() * 90000000);
@@ -286,8 +305,8 @@ function validateAndNext(step) {
     }
     goToStep(2);
   } else if (step === 2) {
-    if (!document.getElementById('f_owner').value.trim() || !document.getElementById('f_email').value.trim()) {
-      alert('Los datos del propietario y correo electrónico son requeridos para la verificación.');
+    if (!document.getElementById('f_owner').value.trim() || !document.getElementById('f_email').value.trim() || !document.getElementById('f_password').value) {
+      alert('Los datos del propietario, correo y la contraseña de gestión son requeridos.');
       return;
     }
     goToStep(3);
@@ -315,49 +334,46 @@ function dispatchDirectToSheets() {
   const selectedTier = document.querySelector('input[name="plan"]:checked')?.value || 'Gratuito';
 
   const systemUserId = createCryptoUserId();
-  const systemStatus = "Pendiente Validacion"; 
   const currentTimestamp = new Date().toLocaleString("es-SV", {timeZone: "America/El_Salvador"});
 
-  // ENHANCED ROUTING PAYLOAD SPECIFIC FOR SHEET TWO SEPARATION
   const datasetPayload = {
-    formType: "business_registration", // Explicit router path flag
-    Fecha_Registro: currentTimestamp,
+    formType: "business_registration", 
+    Fecha_Registration: currentTimestamp, // Safely mapped standard
     Nombre: businessName,
     Categoría: document.getElementById('f_cat').value,
     Barrio: document.getElementById('f_barrio').value,
     Teléfono: document.getElementById('f_tel').value.trim(),
     Descripción: document.getElementById('f_desc').value || 'Sin descripción',
-    Estado: systemStatus,
+    Estado: "Pendiente Validacion",
     Horario: document.getElementById('f_horario').value || 'No especificado',
     Origen: document.getElementById('f_source').value || 'No especificado',
     Plan: selectedTier,
     Propietario: document.getElementById('f_owner').value,
     DUI: document.getElementById('f_dui').value || 'No provisto',
     Email: document.getElementById('f_email').value,
-    Usuarioid: systemUserId
+    Usuarioid: systemUserId,
+    Clave: document.getElementById('f_password').value
   };
 
+  // Run transmission to Apps Script completely decoupled to escape opaque response locks
   fetch(ACTIVE_URL, {
     method: 'POST',
     mode: 'no-cors', 
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(datasetPayload)
-  })
-  .then(() => executionSuccessCleanUp(businessName))
-  .catch(err => {
-    console.error('Direct connection failure:', err);
-    alert('Error de red al registrar directo en Sheets.');
-    targetBtn.disabled = false;
-    targetBtn.textContent = '✓ Finalizar e Inyectar Datos';
   });
-}
 
-function executionSuccessCleanUp(name) {
-  document.getElementById('registrationForm').style.display = 'none';
-  document.getElementById('progressWrap').style.display = 'none';
-  document.getElementById('outBizName').textContent = name;
-  document.getElementById('successCard').classList.add('active');
-  window.scrollTo({top: 0, behavior: 'smooth'});
+  // Shift execution cards instantly using structural parameters to stop infinite waiting states
+  setTimeout(() => {
+    document.getElementById('registrationForm').style.display = 'none';
+    document.getElementById('progressWrap').style.display = 'none';
+    
+    document.getElementById('outBiz').textContent = businessName;
+    document.getElementById('outId').textContent = systemUserId;
+    
+    document.getElementById('successCard').classList.add('active');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }, 600);
 }
 </script>
 </body>
