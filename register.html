@@ -314,7 +314,7 @@ function validateAndNext(step) {
 }
 
 function goToStep(n) {
-  document.querySelectorAll('.form-card').forEach((card, i) => card.classList.toggle('active', i + 1 === n));
+  document.querySelectorAll('.form-card').forEach((card, i) => card.className = 'form-card' + (i + 1 === n ? ' active' : ''));
   document.getElementById('step1-indicator').classList.toggle('active', n >= 1);
   document.getElementById('step1-indicator').classList.toggle('done', n > 1);
   document.getElementById('line1').classList.toggle('done', n > 1);
@@ -338,7 +338,7 @@ function dispatchDirectToSheets() {
 
   const datasetPayload = {
     formType: "business_registration", 
-    Fecha_Registration: currentTimestamp, // Safely mapped standard
+    Fecha_Registration: currentTimestamp, 
     Nombre: businessName,
     Categoría: document.getElementById('f_cat').value,
     Barrio: document.getElementById('f_barrio').value,
@@ -355,7 +355,6 @@ function dispatchDirectToSheets() {
     Clave: document.getElementById('f_password').value
   };
 
-  // Run transmission to Apps Script completely decoupled to escape opaque response locks
   fetch(ACTIVE_URL, {
     method: 'POST',
     mode: 'no-cors', 
@@ -363,7 +362,6 @@ function dispatchDirectToSheets() {
     body: JSON.stringify(datasetPayload)
   });
 
-  // Shift execution cards instantly using structural parameters to stop infinite waiting states
   setTimeout(() => {
     document.getElementById('registrationForm').style.display = 'none';
     document.getElementById('progressWrap').style.display = 'none';
