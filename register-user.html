@@ -218,7 +218,7 @@ function validateAndNext(step) {
 }
 
 function goToStep(n) {
-  document.querySelectorAll('.form-card').forEach((card, i) => card.classList.toggle('active', i + 1 === n));
+  document.querySelectorAll('.form-card').forEach((card, i) => card.className = 'form-card' + (i + 1 === n ? ' active' : ''));
   document.getElementById('step1-indicator').classList.toggle('active', n >= 1);
   document.getElementById('step1-indicator').classList.toggle('done', n > 1);
   document.getElementById('line1').classList.toggle('done', n > 1);
@@ -247,7 +247,7 @@ function dispatchNeighborToSheets() {
   const email = document.getElementById('f_email').value.trim();
   const generatedId = generateNeighborId();
 
-  // FORCE IMMEDIATELY SYNCHRONOUS PERSISTENT LOG IN (Guarantees the infinite loops are broken)
+  // FORCE IMMEDIATELY SYNCHRONOUS PERSISTENT LOG IN (Guarantees infinite loops are completely broken)
   localStorage.setItem('mc_user_id', generatedId);
   localStorage.setItem('mc_user_name', neighborFirst);
   localStorage.setItem('mc_user_zone', quartier);
