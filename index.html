@@ -198,7 +198,7 @@
   .modal-switch-text { font-size: 0.82rem; margin-top: 14px; color: var(--ink-muted); }
   .modal-switch-text span { color: var(--accent); cursor: pointer; text-decoration: underline; font-weight: 600; }
   
-  /* PREMIUM PREVENTIVE DESTRUCTIVE LOGOUT LINK STYLING */
+  /* LOGOUT BUTTON */
   .btn-logout-modal {
     background: none; border: none; color: #cc0000; font-family: 'DM Sans', sans-serif;
     font-size: 0.82rem; font-weight: 700; text-decoration: underline; cursor: pointer;
@@ -430,12 +430,11 @@ function evaluateUserSession() {
   }
 }
 
-// MASTER TERMINATION ROUTINE: Clears storage memory and resets layout boundaries
 function executeNavbarSessionLogout() {
   if (confirm('¿Estás seguro de que deseas cerrar tu sesión en Marsella Conecta?')) {
     logUserEvent('Cierre_Sesion', '', localStorage.getItem('mc_user_id') || '');
     localStorage.clear();
-    window.location.reload(); // Hard reloads directory state immediately
+    window.location.reload();
   }
 }
 
@@ -446,7 +445,6 @@ function switchToLoginLayout() {
   closeAuthModal();
   document.getElementById('userLoginModal').classList.add('active');
 }
-if (cols[2] === emailInput && cols[8] === passwordInput) {
 function closeLoginModal() { document.getElementById('userLoginModal').classList.remove('active'); }
 
 async function executeNeighborLogin() {
