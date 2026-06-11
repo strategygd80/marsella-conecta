@@ -39,7 +39,7 @@
   }
   .nav-links a:hover, .nav-links a.active { background: var(--accent); color: #fff; }
   
-  /* AUTH NAVIGATION */
+  /* AUTH COMPONENT NAVIGATION CONTAINER */
   .nav-actions { display: flex; align-items: center; gap: 10px; }
   .btn-join-nav {
     background: transparent; color: #fff; text-decoration: none;
@@ -48,6 +48,7 @@
   }
   .btn-join-nav:hover { background: rgba(255,255,255,0.1); border-color: #fff; }
 
+  /* CONTEXT-AWARE PROFILE BUTTON */
   .profile-badge-nav {
     background: #2d2420; color: #fff; border: 1.5px solid var(--border);
     padding: 6px 14px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
@@ -56,7 +57,7 @@
   .profile-badge-nav:hover { background: var(--accent); border-color: var(--accent); }
 
   .nav-cta {
-    background: var(--accent); color: #fff; border: none; cursor: pointer;
+    background: var(--accent); color: #fff; border: none; pointer: pointer;
     padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
     font-family: 'DM Sans', sans-serif; text-decoration: none;
     transition: transform 0.15s, opacity 0.15s;
@@ -64,7 +65,9 @@
   .nav-cta:hover { opacity: 0.88; transform: translateY(-1px); }
 
   /* HERO */
-  .hero { background: var(--ink); padding: 52px 24px 44px; text-align: center; position: relative; overflow: hidden; }
+  .hero {
+    background: var(--ink); padding: 52px 24px 44px; text-align: center; position: relative; overflow: hidden;
+  }
   .hero::before {
     content: ''; position: absolute; inset: 0;
     background: radial-gradient(ellipse 70% 60% at 50% 120%, rgba(232,57,14,0.22) 0%, transparent 70%);
@@ -74,7 +77,10 @@
     color: var(--accent); font-size: 0.72rem; font-weight: 600; letter-spacing: 1.5px;
     text-transform: uppercase; padding: 5px 14px; border-radius: 20px; margin-bottom: 18px;
   }
-  .hero h1 { font-family: 'Syne', sans-serif; font-size: clamp(2rem, 6vw, 3.2rem); font-weight: 800; color: #fff; line-height: 1.1; margin-bottom: 14px; position: relative; }
+  .hero h1 {
+    font-family: 'Syne', sans-serif; font-size: clamp(2rem, 6vw, 3.2rem);
+    font-weight: 800; color: #fff; line-height: 1.1; margin-bottom: 14px; position: relative;
+  }
   .hero h1 em { color: var(--accent); font-style: normal; }
   .hero p { color: rgba(255,255,255,0.6); font-size: 1rem; max-width: 480px; margin: 0 auto 28px; }
   .search-wrap { max-width: 540px; margin: 0 auto; position: relative; }
@@ -98,7 +104,7 @@
   .stat-num { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--accent); }
   .stat-label { font-size: 0.7rem; color: var(--ink-muted); margin-top: 2px; }
 
-  /* CATEGORIES & PILLS */
+  /* CATEGORIES */
   .section { padding: 28px 20px; }
   .section-title { font-family: 'Syne', sans-serif; font-size: 0.7rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 14px; }
   .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; }
@@ -107,21 +113,29 @@
   .cat-card.active { border-color: var(--accent); background: #fff5f3; }
   .cat-icon { font-size: 1.6rem; margin-bottom: 6px; }
   .cat-name { font-size: 0.7rem; font-weight: 600; color: var(--ink); }
+
+  /* PILLS */
   .pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
   .pill { padding: 7px 16px; border-radius: 20px; font-size: 0.78rem; font-weight: 500; border: 1.5px solid var(--border); background: var(--surface); cursor: pointer; transition: all 0.18s; white-space: nowrap; }
   .pill:hover { border-color: var(--accent); color: var(--accent); }
   .pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-  /* LISTINGS & CARDS */
+  /* LISTINGS & HOMEPAGE SECTIONS */
   .listings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
   .results-count { font-size: 0.82rem; color: var(--ink-muted); }
   .sort-select { font-family: 'DM Sans', sans-serif; font-size: 0.8rem; border: 1.5px solid var(--border); border-radius: 8px; padding: 6px 10px; background: var(--surface); cursor: pointer; outline: none; }
   .listings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
-  .section-divider { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--ink); margin: 28px 0 14px 0; width: 100%; grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; }
+  
+  .section-divider {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--ink);
+    margin: 28px 0 14px 0; width: 100%; grid-column: 1 / -1; display: flex; align-items: center; gap: 12px;
+  }
   .section-divider::after { content: ''; flex: 1; height: 1.5px; background: var(--border); }
+
   .biz-card { background: var(--surface); border-radius: var(--radius); border: 1.5px solid var(--border); box-shadow: var(--card-shadow); overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; animation: fadeUp 0.3s ease both; }
   .biz-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(26,23,20,0.12); }
   @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
   .biz-header { padding: 16px 16px 0; display: flex; align-items: flex-start; gap: 12px; }
   .biz-avatar { width: 46px; height: 46px; border-radius: 10px; flex-shrink: 0; background: linear-gradient(135deg, var(--accent) 0%, #ff6b3d 100%); display: grid; place-items: center; font-size: 1.3rem; }
   .biz-meta { flex: 1; min-width: 0; }
@@ -130,19 +144,52 @@
   .biz-badges { display: flex; gap: 5px; margin-top: 6px; flex-wrap: wrap; }
   .badge { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.5px; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; }
   .badge-verified { background: #e6f4ee; color: var(--accent2); }
+  .badge-new { background: #fff3cd; color: #92600a; }
   .badge-featured { background: #fce8e3; color: var(--accent); }
+  .badge-premium { background: #1a1714; color: var(--gold); }
+
   .biz-desc { padding: 10px 16px; font-size: 0.82rem; color: var(--ink-muted); line-height: 1.5; }
   .biz-hours { padding: 0 16px 6px; font-size: 0.78rem; color: var(--ink-muted); }
   .biz-hours span { color: var(--accent2); font-weight: 600; }
   .biz-stars { padding: 0 16px 12px; font-size: 0.8rem; color: var(--gold); }
+
   .biz-actions { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
-  .btn-call, .btn-wa, .btn-share { flex: 1; padding: 9px; border-radius: 9px; font-size: 0.78rem; font-weight: 600; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; justify-content: center; gap: 5px; transition: all 0.2s; text-decoration: none; }
+  .btn-call, .btn-wa, .btn-share {
+    flex: 1; padding: 9px; border-radius: 9px; font-size: 0.78rem; font-weight: 600;
+    border: none; cursor: pointer; font-family: 'DM Sans', sans-serif;
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+    transition: opacity 0.2s, transform 0.15s; text-decoration: none;
+  }
   .btn-call { background: var(--ink); color: #fff; }
   .btn-wa { background: #25d366; color: #fff; }
   .btn-share { background: var(--bg); color: var(--ink); border: 1.5px solid var(--border); flex: 0 0 38px; }
   .btn-call:hover, .btn-wa:hover { opacity: 0.85; transform: translateY(-1px); }
 
-  /* MODALS & PORTALS */
+  /* COMMUNITY WALL CONVERSION MODAL LAYER */
+  .mc-modal-overlay {
+    position: fixed; inset: 0; background: rgba(26,23,20,0.65);
+    z-index: 2000; display: grid; place-items: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+  }
+  .mc-modal-overlay.active { opacity: 1; pointer-events: auto; }
+  .mc-modal-card {
+    background: var(--surface); border-radius: 16px; border: 1.5px solid var(--border);
+    padding: 32px; max-width: 420px; width: 90%; text-align: center;
+    box-shadow: 0 10px 32px rgba(26,23,20,0.2); transform: translateY(15px); transition: transform 0.25s ease;
+  }
+  .mc-modal-overlay.active .mc-modal-card { transform: translateY(0); }
+  .mc-modal-icon { font-size: 3.2rem; margin-bottom: 12px; }
+  .mc-modal-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.45rem; margin-bottom: 10px; line-height: 1.25; }
+  .mc-modal-text { font-size: 0.88rem; color: var(--ink-muted); line-height: 1.5; margin-bottom: 24px; }
+  .mc-modal-cta {
+    display: block; width: 100%; background: var(--accent); color: #fff;
+    text-decoration: none; padding: 13px; border-radius: 10px; font-weight: 700;
+    font-size: 0.9rem; margin-bottom: 14px; transition: opacity 0.2s;
+  }
+  .mc-modal-cta:hover { opacity: 0.9; }
+  .mc-modal-close { background: none; border: none; font-size: 0.82rem; color: var(--ink-muted); cursor: pointer; text-decoration: underline; }
+
+  /* PROFILE AND EDITING PORTAL FIELDS */
   .modal-form-group { text-align: left; margin-bottom: 14px; }
   .modal-form-group label { display: block; font-size: 0.78rem; font-weight: 700; margin-bottom: 4px; }
   .modal-form-group input { width:100%; padding: 10px; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; outline: none; background: var(--bg); }
@@ -150,14 +197,25 @@
   .modal-row-split { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .modal-switch-text { font-size: 0.82rem; margin-top: 14px; color: var(--ink-muted); }
   .modal-switch-text span { color: var(--accent); cursor: pointer; text-decoration: underline; font-weight: 600; }
-  .btn-logout-modal { background: none; border: none; color: #cc0000; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 700; text-decoration: underline; cursor: pointer; margin-top: 18px; display: inline-block; }
+  
+  /* LOGOUT BUTTON */
+  .btn-logout-modal {
+    background: none; border: none; color: #cc0000; font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem; font-weight: 700; text-decoration: underline; cursor: pointer;
+    margin-top: 18px; display: inline-block; transition: opacity 0.15s;
+  }
+  .btn-logout-modal:hover { opacity: 0.75; }
+
   .empty-state { text-align: center; padding: 60px 20px; color: var(--ink-muted); }
   .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+  
   .cta-banner { margin: 24px 20px; padding: 28px 24px; border-radius: 16px; background: linear-gradient(135deg, var(--ink) 0%, #2d2420 100%); color: #fff; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
   .cta-banner-text { flex: 1; min-width: 200px; }
   .cta-banner h3 { font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 800; margin-bottom: 5px; }
   .cta-banner p { font-size: 0.83rem; color: rgba(255,255,255,0.65); }
   .cta-banner a { background: var(--accent); color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 700; font-size: 0.88rem; white-space: nowrap; transition: opacity 0.2s; }
+  .cta-banner a:hover { opacity: 0.85; }
+
   footer { background: var(--ink); color: rgba(255,255,255,0.5); padding: 28px 24px; text-align: center; font-size: 0.78rem; margin-top: 20px; }
   footer a { color: rgba(255,255,255,0.7); text-decoration: none; }
   footer strong { color: #fff; font-family: 'Syne', sans-serif; }
@@ -198,6 +256,7 @@
 <div class="stats-bar">
   <div class="stat-item"><div class="stat-num" id="totalBiz">—</div><div class="stat-label">Negocios</div></div>
   <div class="stat-item"><div class="stat-num" id="totalCat">—</div><div class="stat-label">Categorías</div></div>
+  <div class="stat-item"><div class="stat-num" id="totalVer">—</div><div class="stat-label">Verificados</div></div>
   <div class="stat-item"><div class="stat-num">🇸🇻</div><div class="stat-label">El Salvador</div></div>
 </div>
 
@@ -253,6 +312,7 @@
     <div class="mc-modal-icon">🔒</div>
     <div class="mc-modal-title">Acceso Vecinal</div>
     <div class="mc-modal-text">Ingresa tus credenciales registradas para reanudar tu sesión permanente.</div>
+    
     <div class="modal-form-group">
       <label>Correo Electrónico</label>
       <input type="email" id="log_email" placeholder="ejemplo@correo.com">
@@ -261,6 +321,7 @@
       <label>Contraseña</label>
       <input type="password" id="log_password" placeholder="••••••••">
     </div>
+    
     <button class="mc-modal-cta" id="loginSubmitBtn" onclick="executeNeighborLogin()">Iniciar Sesión</button>
     <div class="modal-switch-text" style="font-size:0.75rem">¿Olvidaste tu contraseña? <span onclick="executePasswordRecoveryRequest()">Recuperar Clave</span></div>
     <button class="mc-modal-close" style="margin-top:10px" onclick="closeLoginModal()">Cancelar</button>
@@ -272,6 +333,7 @@
     <div class="mc-modal-icon">⚙️</div>
     <div class="mc-modal-title">Configuración de Perfil</div>
     <div class="mc-modal-text">Modifica tus variables comunitarias en tiempo real. Tu ID de cuenta no cambiará.</div>
+    
     <div class="modal-row-split">
       <div class="modal-form-group"><label>Nombre</label><input type="text" id="edit_nombre"></div>
       <div class="modal-form-group"><label>Apellido</label><input type="text" id="edit_apellido"></div>
@@ -282,8 +344,10 @@
       <div class="modal-form-group"><label>Senda / Quartier</label><input type="text" id="edit_quartier"></div>
     </div>
     <div class="modal-form-group"><label>Cambiar Contraseña (Opcional)</label><input type="password" id="edit_password" placeholder="Dejar en blanco para mantener actual"></div>
+    
     <button class="mc-modal-cta" id="editProfileSubmitBtn" onclick="dispatchProfileOverwrites()">✓ Guardar Cambios</button>
     <button class="mc-modal-close" onclick="closeProfileEditModal()">Cerrar sin guardar</button>
+    
     <div>
       <button class="btn-logout-modal" onclick="executeNavbarSessionLogout()">🔴 Cerrar mi Sesión Comunitaria</button>
     </div>
@@ -561,6 +625,8 @@ function renderStats() {
   document.getElementById('totalBiz').textContent = allData.length;
   const cats = new Set(allData.map(r => getField(r,'Categoría')).filter(Boolean));
   document.getElementById('totalCat').textContent = cats.size;
+  const ver = allData.filter(r => ['activo','verificado','active','pendiente validacion'].includes((getField(r,'Estado')||'').toLowerCase())).length;
+  document.getElementById('totalVer').textContent = ver;
 }
 
 function renderCategories() {
