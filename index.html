@@ -624,8 +624,6 @@ function renderStats() {
   document.getElementById('totalBiz').textContent = allData.length;
   const cats = new Set(allData.map(r => getField(r,'Categoría')).filter(Boolean));
   document.getElementById('totalCat').textContent = cats.size;
-  const ver = allData.filter(r => ['activo','verificado','active','pendiente validacion'].includes((getField(r,'Estado')||'').toLowerCase())).length;
-  document.getElementById('totalVer').textContent = ver;
 }
 
 function renderCategories() {
