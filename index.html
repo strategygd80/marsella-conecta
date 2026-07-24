@@ -354,14 +354,19 @@
   </div>
 </div>
 
-<script>
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRtiBEyirRS73NI23sRAllDT7g3aphl5uYmhDIRHKhzwjYDZD8c0YmNv19WfkBgHXZxTLlS5HnROUOz/pub?gid=0&single=true&output=csv';
-const USER_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRtiBEyirRS73NI23sRAllDT7g3aphl5uYmhDIRHKhzwjYDZD8c0YmNv19WfkBgHXZxTLlS5HnROUOz/pub?gid=596180293&single=true&output=csv';
-const GOOGLE_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbyvDoqy9S9kIm9CUbHRppPQ_AFH8D7gfilV1F9nLgkdwEuM9Zl1NuwiFSFy8dfir0VZ/exec';
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+// ---- Fill these in from Supabase > Project Settings > API ----
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+// ----------------------------------------------------------------
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const COUNTRY_CODE = '503';
 
 const CATEGORY_ICONS = {
-  'Taxi': '🚕', 'Transporte': '🚕', 'Trasporte': '🚕', 'Comida': '🍴', 'Alimentacion': '🍴', 'Alimetacio': '🍴', 'Servicios Otros': '🔧',
+  'Transporte': '🚕', 'Alimentacion': '🍴', 'Servicios Otros': '🔧',
   'Bebidas': '🍺', 'Instalacion AC': '❄️', 'Plomería': '🔩',
   'Electricidad': '⚡', 'Mecánica': '🔨', 'Belleza': '💇',
   'Farmacia': '💊', 'Tienda': '🛒', 'Médico': '🏥', 'Servicios Tecnicos/ Hogar': '🏠'
@@ -369,39 +374,31 @@ const CATEGORY_ICONS = {
 const FALLBACK_ICON = '📦';
 
 const SAMPLE_DATA = [
-  { Nombre:'VIP Taxi Marsella', Categoría:'Transporte', Sub_Categoria:'Taxi', Barrio:'Colonia Marsella', Teléfono:'75404955', Descripción:'Servicio de taxi 24/7 para toda la zona', Estado:'Activo', Estrellas:'5', Horario:'Todos los días 6am-10pm', Plan:'Gratuito' }
+  { nombre: 'VIP Taxi Marsella', categoria: 'Transporte', barrio: 'Colonia Marsella', telefono: '75404955', descripcion: 'Servicio de taxi 24/7 para toda la zona', estado: 'Activo', estrellas: 5, horario: 'Todos los días 6am-10pm', plan: 'Gratuito' }
 ];
 
 let allData = [];
 let filtered = [];
 let activeFilter = 'Todos';
 let searchDebounceTimer = null;
+let currentProfile = null; // cached profile row of the signed-in neighbor
 
-function logUserEvent(eventType, searchVal = '', bizName = '') {
-  const activeSessionId = localStorage.getItem('mc_user_id') || 'Anonimo';
-  const currentTimestamp = new Date().toLocaleString("es-SV", {timeZone: "America/El_Salvador"});
-  
-  const analyticalPayload = {
-    formType: "user_event_log",
-    Fecha: currentTimestamp,
-    Usuarioid: activeSessionId,
-    Evento_Tipo: eventType,
-    Valor_Busqueda: searchVal,
-    Negocio_Nombre: bizName
-  };
-
-  fetch(GOOGLE_SCRIPT_API_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(analyticalPayload)
-  }).catch(err => console.warn("Analytics logger tracking timeout:", err));
+async function logUserEvent(eventType, searchVal = '', bizName = '') {
+  try {
+    await supabase.from('events_log').insert({
+      profile_id: currentProfile?.id || null,
+      evento_tipo: eventType,
+      valor_busqueda: searchVal,
+      negocio_nombre: bizName
+    });
+  } catch (err) {
+    console.warn('Analytics logger failed:', err);
+  }
 }
 
-function evaluateUserSession() {
-  const verifiedToken = localStorage.getItem('mc_user_id');
-  const userNameToken = localStorage.getItem('mc_user_name');
-  
+async function evaluateUserSession() {
+  const { data: { session } } = await supabase.auth.getSession();
+
   const navJoinBtn = document.getElementById('navJoinBtn');
   const navMerchantCta = document.getElementById('navMerchantCta');
   const navPublicLinks = document.getElementById('navPublicLinks');
@@ -409,42 +406,47 @@ function evaluateUserSession() {
   const bottomBanner = document.getElementById('bottomMerchantBanner');
   const footerBizElements = document.querySelectorAll('.biz-hide-element');
 
-  if (!verifiedToken) {
+  if (!session) {
+    currentProfile = null;
     if (navJoinBtn) navJoinBtn.style.display = 'block';
     if (navMerchantCta) navMerchantCta.style.display = 'block';
     if (navPublicLinks) navPublicLinks.style.display = 'flex';
     if (bottomBanner) bottomBanner.style.display = 'flex';
     if (profileBadge) profileBadge.style.display = 'none';
     footerBizElements.forEach(el => el.style.display = 'inline');
-  } else {
-    if (navJoinBtn) navJoinBtn.style.display = 'none';
-    if (navMerchantCta) navMerchantCta.style.display = 'none';
-    if (navPublicLinks) navPublicLinks.style.display = 'none'; 
-    if (bottomBanner) bottomBanner.style.display = 'none';
-    
-    if (profileBadge) {
-      profileBadge.textContent = `👤 Hola, ${userNameToken || 'Vecino'}`;
-      profileBadge.style.display = 'block';
-    }
-    footerBizElements.forEach(el => el.style.display = 'none');
+    return;
   }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('auth_user_id', session.user.id)
+    .single();
+  currentProfile = profile;
+
+  if (navJoinBtn) navJoinBtn.style.display = 'none';
+  if (navMerchantCta) navMerchantCta.style.display = 'none';
+  if (navPublicLinks) navPublicLinks.style.display = 'none';
+  if (bottomBanner) bottomBanner.style.display = 'none';
+
+  if (profileBadge) {
+    profileBadge.textContent = `👤 Hola, ${profile?.nombre || 'Vecino'}`;
+    profileBadge.style.display = 'block';
+  }
+  footerBizElements.forEach(el => el.style.display = 'none');
 }
 
-function executeNavbarSessionLogout() {
+async function executeNavbarSessionLogout() {
   if (confirm('¿Estás seguro de que deseas cerrar tu sesión en Marsella Conecta?')) {
-    logUserEvent('Cierre_Sesion', '', localStorage.getItem('mc_user_id') || '');
-    localStorage.clear();
+    await logUserEvent('Cierre_Sesion');
+    await supabase.auth.signOut();
     window.location.reload();
   }
 }
 
 function openAuthModal() { document.getElementById('authGateModal').classList.add('active'); }
 function closeAuthModal() { document.getElementById('authGateModal').classList.remove('active'); }
-
-function switchToLoginLayout() {
-  closeAuthModal();
-  document.getElementById('userLoginModal').classList.add('active');
-}
+function switchToLoginLayout() { closeAuthModal(); document.getElementById('userLoginModal').classList.add('active'); }
 function closeLoginModal() { document.getElementById('userLoginModal').classList.remove('active'); }
 
 async function executeNeighborLogin() {
@@ -453,84 +455,58 @@ async function executeNeighborLogin() {
   const loginBtn = document.getElementById('loginSubmitBtn');
 
   if (!emailInput || !passwordInput) {
-    alert('Por favor introduce tu correo electrónico y tu contraseña de seguridad.');
+    alert('Por favor introduce tu correo electrónico y tu contraseña.');
     return;
   }
 
   loginBtn.disabled = true;
   loginBtn.textContent = 'Autenticando credenciales...';
 
-  try {
-    const res = await fetch(USER_SHEET_CSV_URL + '&cb=' + new Date().getTime());
-    if (!res.ok) throw new Error('Database pipeline timeout');
-    const text = await res.text();
-    
-    const lines = text.trim().split('\n');
-    let accessGranted = false;
+  const { error } = await supabase.auth.signInWithPassword({ email: emailInput, password: passwordInput });
 
-    for (let i = 1; i < lines.length; i++) {
-      if (!lines[i].trim()) continue;
-      const cols = parseCSVLine(lines[i]);
-      if (cols.length < 9) continue;
-
-      const registeredEmail = (cols[2] || '').trim().replace(/^"|"$/g,'').toLowerCase();
-      const registeredPass = (cols[8] || '').trim().replace(/^"|"$/g,'');
-      const registeredName = (cols[0] || '').trim().replace(/^"|"$/g,'');
-      const registeredZone = (cols[4] || '').trim().replace(/^"|"$/g,'');
-      const registeredId = (cols[7] || '').trim().replace(/^"|"$/g,'');
-
-      if (registeredEmail === emailInput && registeredPass === passwordInput) {
-        localStorage.setItem('mc_user_id', registeredId);
-        localStorage.setItem('mc_user_name', registeredName);
-        localStorage.setItem('mc_user_zone', registeredZone);
-        localStorage.setItem('mc_user_email_saved', registeredEmail);
-        localStorage.setItem('mc_user_lastname_saved', (cols[1] || '').trim().replace(/^"|"$/g,''));
-        
-        accessGranted = true;
-        break;
-      }
-    }
-
-    if (accessGranted) {
-      logUserEvent('Login_Exitoso', '', '');
-      closeLoginModal();
-      evaluateUserSession();
-      alert('¡Sesión iniciada con éxito! Bienvenido de vuelta.');
-    } else {
-      alert('Credenciales inválidas. Verifica tu correo y contraseña o regístrate como nuevo vecino.');
-    }
-  } catch(e) {
-    console.error('Authentication anomaly caught:', e);
-    alert('Error temporal de conexión con el nodo de seguridad de Google. Reintenta.');
-  } finally {
-    loginBtn.disabled = false;
-    loginBtn.textContent = 'Iniciar Sesión';
+  if (!error) {
+    await evaluateUserSession();
+    await logUserEvent('Login_Exitoso');
+    closeLoginModal();
+    alert('¡Sesión iniciada con éxito! Bienvenido de vuelta.');
+  } else {
+    alert('Credenciales inválidas.\n\nSi te registraste antes de la actualización de seguridad de julio 2026, tu contraseña anterior ya no es válida: usa "Unirte Ahora" con el mismo correo para crear tu nueva contraseña.');
   }
+
+  loginBtn.disabled = false;
+  loginBtn.textContent = 'Iniciar Sesión';
 }
 
-function executePasswordRecoveryRequest() {
+async function executePasswordRecoveryRequest() {
   const emailInput = document.getElementById('log_email').value.trim();
-  if(!emailInput) {
+  if (!emailInput) {
     alert('Introduce tu dirección de correo electrónico en el campo superior para iniciar el proceso de recuperación.');
     return;
   }
-  alert(`Se ha enviado una alerta de reconfiguración de clave a la cola de administración para el correo: ${emailInput}. Daniela o tu administrador validarán tu identidad vía WhatsApp.`);
+  const { error } = await supabase.auth.resetPasswordForEmail(emailInput, {
+    redirectTo: window.location.origin + '/reset-password.html'
+  });
+  if (error) {
+    alert('No se pudo enviar el correo de recuperación. Verifica que ya tengas una cuenta creada en el nuevo sistema (usa "Unirte Ahora" si aún no la has creado).');
+  } else {
+    alert(`Se ha enviado un enlace de recuperación de contraseña a: ${emailInput}. Revisa tu correo.`);
+  }
   logUserEvent('Solicitud_Recuperacion_Clave', emailInput, '');
 }
 
 async function openProfileEditModal() {
-  document.getElementById('edit_nombre').value = localStorage.getItem('mc_user_name') || '';
-  document.getElementById('edit_apellido').value = localStorage.getItem('mc_user_lastname_saved') || '';
-  document.getElementById('edit_email').value = localStorage.getItem('mc_user_email_saved') || '';
-  document.getElementById('edit_quartier').value = localStorage.getItem('mc_user_zone') || '';
-  document.getElementById('edit_whatsapp').value = ''; 
+  if (!currentProfile) return;
+  document.getElementById('edit_nombre').value = currentProfile.nombre || '';
+  document.getElementById('edit_apellido').value = currentProfile.apellido || '';
+  document.getElementById('edit_email').value = currentProfile.email || '';
+  document.getElementById('edit_quartier').value = currentProfile.quartier || '';
+  document.getElementById('edit_whatsapp').value = currentProfile.whatsapp || '';
   document.getElementById('edit_password').value = '';
-
   document.getElementById('profileEditModal').classList.add('active');
 }
 function closeProfileEditModal() { document.getElementById('profileEditModal').classList.remove('active'); }
 
-function dispatchProfileOverwrites() {
+async function dispatchProfileOverwrites() {
   const saveBtn = document.getElementById('editProfileSubmitBtn');
   const nombre = document.getElementById('edit_nombre').value.trim();
   const apellido = document.getElementById('edit_apellido').value.trim();
@@ -539,222 +515,171 @@ function dispatchProfileOverwrites() {
   const whatsapp = document.getElementById('edit_whatsapp').value.trim();
   const password = document.getElementById('edit_password').value;
 
-  if(!nombre || !apellido || !email || !quartier) {
-    alert('Por favor rellena todos los campos obligatorios de identificación vecinal.');
+  if (!nombre || !apellido || !email || !quartier) {
+    alert('Por favor rellena todos los campos obligatorios.');
     return;
   }
 
   saveBtn.disabled = true;
-  saveBtn.textContent = 'Guardando cambios en base de datos...';
+  saveBtn.textContent = 'Guardando cambios...';
 
-  const currentUserId = localStorage.getItem('mc_user_id');
+  const { error: profileErr } = await supabase
+    .from('profiles')
+    .update({ nombre, apellido, quartier, whatsapp })
+    .eq('id', currentProfile.id);
 
-  const updatePayload = {
-    formType: "edit_user_profile",
-    Nombre: nombre,
-    Apellido: apellido,
-    "Correo Electronico": email,
-    "Numero Whatsapp": whatsapp || 'No cambiado',
-    Quartier: quartier,
-    Usarioid: currentUserId,
-    Clave: password || '' 
-  };
+  const authUpdates = {};
+  if (password) authUpdates.password = password;
+  if (email && email.toLowerCase() !== (currentProfile.email || '').toLowerCase()) authUpdates.email = email;
 
-  fetch(GOOGLE_SCRIPT_API_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(updatePayload)
-  });
-
-  localStorage.setItem('mc_user_name', nombre);
-  localStorage.setItem('mc_user_zone', quartier);
-  localStorage.setItem('mc_user_email_saved', email);
-  localStorage.setItem('mc_user_lastname_saved', apellido);
-
-  setTimeout(() => {
-    logUserEvent('Edicion_Perfil_Exitoso', '', currentUserId);
-    closeProfileEditModal();
-    evaluateUserSession();
-    saveBtn.disabled = false;
-    saveBtn.textContent = '✓ Guardar Cambios';
-    alert('¡Tu perfil comunitario ha sido actualizado de forma exitosa en el servidor principal!');
-  }, 700);
-}
-
-function parseCSV(text) {
-  const lines = text.trim().split('\n');
-  if (lines.length < 2) return [];
-  const rawHeaders = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g,''));
-  const headers = rawHeaders.map(h => normalizeKey(h));
-
-  return lines.slice(1).map(line => {
-    const cols = parseCSVLine(line);
-    const obj = {};
-    let offset = cols.length > headers.length ? 1 : 0;
-    headers.forEach((h, i) => { obj[h] = (cols[i + offset] || '').trim().replace(/^"|"$/g,''); });
-    rawHeaders.forEach((h, i) => { obj[h] = (cols[i + offset] || '').trim().replace(/^"|"$/g,''); });
-    return obj;
-  }).filter(r => getField(r,'Nombre'));
-}
-
-function normalizeKey(k) { return k.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'_'); }
-
-function parseCSVLine(line) {
-  const result = []; let cur = ''; let inQ = false;
-  for (let i = 0; i < line.length; i++) {
-    if (line[i] === '"') { inQ = !inQ; }
-    else if (line[i] === ',' && !inQ) { result.push(cur); cur = ''; }
-    else cur += line[i];
+  let authErr = null;
+  if (Object.keys(authUpdates).length) {
+    const res = await supabase.auth.updateUser(authUpdates);
+    authErr = res.error;
+    if (!authErr && authUpdates.email) {
+      await supabase.from('profiles').update({ email }).eq('id', currentProfile.id);
+    }
   }
-  result.push(cur); return result;
-}
 
-function getField(row, field) {
-  if (row[field] !== undefined) return row[field];
-  const n = normalizeKey(field);
-  if (row[n] !== undefined) return row[n];
-  const fl = field.toLowerCase().replace(/[^a-z]/g,'');
-  for (const k of Object.keys(row)) {
-    if (k.toLowerCase().replace(/[^a-z]/g,'').includes(fl)) return row[k];
+  saveBtn.disabled = false;
+  saveBtn.textContent = '✓ Guardar Cambios';
+
+  if (profileErr || authErr) {
+    alert('Hubo un problema guardando algunos cambios: ' + (profileErr?.message || authErr?.message));
+    return;
   }
-  return '';
+
+  await evaluateUserSession();
+  logUserEvent('Edicion_Perfil_Exitoso');
+  closeProfileEditModal();
+  alert('¡Tu perfil comunitario ha sido actualizado con éxito!' + (authUpdates.email ? ' Revisa tu correo para confirmar el nuevo email.' : ''));
 }
 
-function cleanPhone(p) { return p.replace(/\D/g,''); }
+function parseCSV(text) { /* unused now, kept as no-op for compatibility */ return []; }
+
+function doSearch() { applyFilters(); logUserEvent('Busqueda_Boton', document.getElementById('searchInput').value.trim(), ''); }
+
 function renderStats() {
   document.getElementById('totalBiz').textContent = allData.length;
-  const cats = new Set(allData.map(r => getField(r,'Categoría')).filter(Boolean));
-  document.getElementById('totalCat').textContent = cats.size;
-  const ver = allData.filter(r => ['activo','verificado','active','pendiente validacion'].includes((getField(r,'Estado')||'').toLowerCase())).length;
-  document.getElementById('totalVer').textContent = ver;
+  document.getElementById('totalCat').textContent = new Set(allData.map(r => r.categoria).filter(Boolean)).size;
+  document.getElementById('totalVer').textContent = allData.filter(r => ['activo','verificado','active'].includes((r.estado||'').toLowerCase())).length;
 }
 
 function renderCategories() {
-  const cats = [...new Set(allData.map(r => getField(r,'Categoría')).filter(Boolean))];
+  const cats = [...new Set(allData.map(r => r.categoria).filter(Boolean))];
   const grid = document.getElementById('catGrid');
-  grid.innerHTML = '';
-  cats.forEach(cat => {
-    const d = document.createElement('div');
-    d.className = 'cat-card' + (activeFilter===cat?' active':'');
-    d.innerHTML = `<div class="cat-icon">${CATEGORY_ICONS[cat]||FALLBACK_ICON}</div><div class="cat-name">${cat}</div>`;
-    d.onclick = () => setFilter(cat);
-    grid.appendChild(d);
-  });
+  grid.innerHTML = cats.map(c => `
+    <div class="cat-card" data-cat="${c}" onclick="window.filterByCategory('${c.replace(/'/g,"\\'")}')">
+      <div class="cat-icon">${CATEGORY_ICONS[c] || FALLBACK_ICON}</div>
+      <div class="cat-name">${c}</div>
+    </div>`).join('');
 }
 
 function renderPills() {
-  const cats = ['Todos', ...new Set(allData.map(r => getField(r,'Categoría')).filter(Boolean))];
+  const cats = ['Todos', ...new Set(allData.map(r => r.categoria).filter(Boolean))];
   const row = document.getElementById('pillRow');
-  row.innerHTML = cats.map(c => `<div class="pill${c===activeFilter?' active':''}" onclick="setFilter('${c}')">${c}</div>`).join('');
+  row.innerHTML = cats.map(c => `<button class="pill ${c===activeFilter?'active':''}" onclick="window.filterByCategory('${c.replace(/'/g,"\\'")}')">${c}</button>`).join('');
 }
 
-function setFilter(cat) {
+window.filterByCategory = function(cat) {
   activeFilter = cat;
-  renderCategories(); renderPills();
-  logUserEvent('Filtrado_Categoria', '', cat);
+  document.querySelectorAll('.cat-card').forEach(el => el.classList.toggle('active', el.dataset.cat === cat));
   applyFilters();
-}
-
-function doSearch() {
-  const query = document.getElementById('searchInput').value.trim();
-  if(query) logUserEvent('Click_Boton_Busqueda', query, '');
-  applyFilters();
-}
+  renderPills();
+};
 
 function applyFilters() {
-  const q = (document.getElementById('searchInput').value||'').toLowerCase().trim();
-  
+  const q = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+
   clearTimeout(searchDebounceTimer);
   if (q.length > 2) {
-    searchDebounceTimer = setTimeout(() => {
-      logUserEvent('Busqueda_Palabra', q, '');
-    }, 1200);
+    searchDebounceTimer = setTimeout(() => logUserEvent('Busqueda_Palabra', q, ''), 1200);
   }
 
   filtered = allData.filter(r => {
-    const matchCat = activeFilter === 'Todos' || getField(r,'Categoría') === activeFilter;
+    const matchCat = activeFilter === 'Todos' || r.categoria === activeFilter;
     if (!q) return matchCat;
-    
-    const hay = [
-      getField(r,'Nombre'),
-      getField(r,'Categoría'),
-      getField(r,'Sub-Categoria'),
-      getField(r,'Subcategoria'),
-      getField(r,'Sub Categoria - Oferta'),
-      getField(r,'Barrio'),
-      getField(r,'Descripción'),
-      getField(r,'Horario'),
-      getField(r,'Servicio Otro')
-    ].join(' ').toLowerCase();
-    
+
+    const hay = [r.nombre, r.categoria, r.sub_categoria, r.barrio, r.descripcion, r.horario].join(' ').toLowerCase();
+
     let implicitMatch = false;
-    if ((q === 'taxi' || q === 'moto' || q === 'flete') && (hay.includes('transporte') || hay.includes('trasporte'))) implicitMatch = true;
-    if ((q === 'comida' || q === 'pupusa' || q === 'pan' || q === 'bebida') && (hay.includes('alimentacion') || hay.includes('alimetacio'))) implicitMatch = true;
+    if ((q === 'taxi' || q === 'moto' || q === 'flete') && hay.includes('transporte')) implicitMatch = true;
+    if ((q === 'comida' || q === 'pupusa' || q === 'pan' || q === 'bebida') && hay.includes('alimentacion')) implicitMatch = true;
     if ((q === 'aire' || q === 'clima' || q === 'gotera' || q === 'techo') && (hay.includes('tecnicos') || hay.includes('hogar'))) implicitMatch = true;
-    
+
     return matchCat && (hay.includes(q) || implicitMatch);
   });
   renderCards();
 }
 
 document.getElementById('searchInput').addEventListener('input', applyFilters);
-document.getElementById('searchInput').addEventListener('keydown', e => e.key==='Enter' && doSearch());
+document.getElementById('searchInput').addEventListener('keydown', e => e.key === 'Enter' && doSearch());
+
+function cleanPhone(t) { return (t || '').replace(/\D/g, ''); }
 
 function generateCardHtml(r, index) {
-  const name = getField(r,'Nombre');
-  const cat = getField(r,'Categoría');
-  const barrio = getField(r,'Barrio');
-  const tel = cleanPhone(getField(r,'Teléfono'));
-  const desc = getField(r,'Descripción');
-  const status = (getField(r,'Estado')||'').toLowerCase();
-  const stars = parseFloat(getField(r,'Estrellas'))||0;
-  const hours = getField(r,'Horario');
-  const plan = (getField(r,'Plan') || '').toLowerCase();
+  const name = r.nombre;
+  const cat = r.categoria;
+  const barrio = r.barrio;
+  const tel = cleanPhone(r.telefono);
+  const desc = r.descripcion;
+  const status = (r.estado || '').toLowerCase();
+  const stars = parseFloat(r.estrellas) || 0;
+  const hours = r.horario;
+  const plan = (r.plan || '').toLowerCase();
   const icon = CATEGORY_ICONS[cat] || FALLBACK_ICON;
-  const isVerified = ['activo','verificado','active'].includes(status);
-  
+  const isVerified = ['activo', 'verificado', 'active'].includes(status);
   const isFeatured = plan.includes('pro') || plan.includes('premium') || plan.includes('destacado');
-  
+
   const badges = [
     isVerified ? '<span class="badge badge-verified">✓ Activo</span>' : '',
     isFeatured ? '<span class="badge badge-featured">⭐ Destacado</span>' : '',
   ].filter(Boolean).join('');
-  const starsHtml = stars ? '★'.repeat(Math.round(stars)) + '☆'.repeat(5-Math.round(stars)) : '';
+  const starsHtml = stars ? '★'.repeat(Math.round(stars)) + '☆'.repeat(5 - Math.round(stars)) : '';
 
   return `<div class="biz-card" data-name="${name}" style="animation-delay:${index*0.03}s">
     <div class="biz-header">
       <div class="biz-avatar">${icon}</div>
       <div class="biz-meta">
         <div class="biz-name">${name}</div>
-        <div class="biz-cat-barrio">${cat}${barrio?' · '+barrio:''}</div>
+        <div class="biz-cat-barrio">${cat}${barrio ? ' · ' + barrio : ''}</div>
         <div class="biz-badges">${badges}</div>
       </div>
     </div>
-    ${desc?`<div class="biz-desc">${desc}</div>`:''}
-    ${hours?`<div class="biz-hours">🕐 <span>${hours}</span></div>`:''}
-    ${starsHtml?`<div class="biz-stars">${starsHtml} ${stars}/5</div>`:''}
+    ${desc ? `<div class="biz-desc">${desc}</div>` : ''}
+    ${hours ? `<div class="biz-hours">🕐 <span>${hours}</span></div>` : ''}
+    ${starsHtml ? `<div class="biz-stars">${starsHtml} ${stars}/5</div>` : ''}
     <div class="biz-actions">
       <a class="btn-call" href="tel:+${COUNTRY_CODE}${tel}">📞 Llamar</a>
-      ${tel?`<a class="btn-wa" href="https://wa.me/${COUNTRY_CODE}${tel}" target="_blank">💬 WhatsApp</a>`:''}
-      <button class="btn-share" onclick="shareBiz('${name}','${tel}')" title="Compartir">⬆️</button>
+      ${tel ? `<a class="btn-wa" href="https://wa.me/${COUNTRY_CODE}${tel}" target="_blank">💬 WhatsApp</a>` : ''}
+      <button class="btn-share" onclick="window.shareBiz('${name.replace(/'/g,"\\'")}','${tel}')" title="Compartir">⬆️</button>
     </div>
   </div>`;
 }
 
+window.shareBiz = function(name, tel) {
+  const text = `Mira ${name} en Marsella Conecta`;
+  if (navigator.share) {
+    navigator.share({ title: name, text, url: window.location.href }).catch(() => {});
+  } else {
+    navigator.clipboard?.writeText(`${text} - ${window.location.href}`);
+    alert('Enlace copiado al portapapeles.');
+  }
+};
+
 function renderCards() {
   const sort = document.getElementById('sortSelect').value;
   const isSearching = document.getElementById('searchInput').value.trim().length > 0;
-  
-  let sorted = [...filtered].sort((a,b) => {
-    if (sort === 'stars') return (parseFloat(getField(b,'Estrellas'))||0) - (parseFloat(getField(a,'Estrellas'))||0);
-    if (sort === 'name') return getField(a,'Nombre').localeCompare(getField(b,'Nombre'));
+
+  let sorted = [...filtered].sort((a, b) => {
+    if (sort === 'stars') return (parseFloat(b.estrellas) || 0) - (parseFloat(a.estrellas) || 0);
+    if (sort === 'name') return (a.nombre || '').localeCompare(b.nombre || '');
     return 0;
   });
 
   document.getElementById('resultsCount').textContent = `${sorted.length} negocio${sorted.length!==1?'s':''} encontrado${sorted.length!==1?'s':''}`;
   const grid = document.getElementById('listingsGrid');
-  
+
   if (!sorted.length) {
     grid.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>No se encontraron negocios con ese criterio.</p></div>';
     return;
@@ -764,21 +689,18 @@ function renderCards() {
     const totalCount = sorted.length;
     const newEntrepreneurs = sorted.slice(Math.max(0, totalCount - 4)).reverse();
     const generalDirectory = sorted.slice(0, Math.max(0, totalCount - 4));
-    
+
     let compiledHtml = '';
-    
     if (newEntrepreneurs.length > 0) {
       compiledHtml += `<div class="section-divider">🌱 Nuevos Emprendimientos (Recién Agregados)</div>`;
       compiledHtml += newEntrepreneurs.map((item, idx) => generateCardHtml(item, idx)).join('');
     }
-    
     if (generalDirectory.length > 0) {
       compiledHtml += `<div class="section-divider">🏪 Todos los Negocios</div>`;
       compiledHtml += generalDirectory.map((item, idx) => generateCardHtml(item, idx)).join('');
     } else if (newEntrepreneurs.length === 0) {
       compiledHtml = sorted.map((item, idx) => generateCardHtml(item, idx)).join('');
     }
-    
     grid.innerHTML = compiledHtml;
   } else {
     grid.innerHTML = sorted.map((item, idx) => generateCardHtml(item, idx)).join('');
@@ -787,12 +709,14 @@ function renderCards() {
 
 async function loadData() {
   try {
-    const res = await fetch(SHEET_CSV_URL + '&cb=' + new Date().getTime());
-    if (!res.ok) throw new Error('fetch failed');
-    const text = await res.text();
-    const parsed = parseCSV(text);
-    allData = parsed.length ? parsed : SAMPLE_DATA;
-  } catch(e) {
+    const { data, error } = await supabase
+      .from('businesses')
+      .select('*')
+      .neq('estado', 'Rechazado')
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+    allData = (data && data.length) ? data : SAMPLE_DATA;
+  } catch (e) {
     console.warn('Using sample data:', e);
     allData = SAMPLE_DATA;
   }
@@ -800,15 +724,28 @@ async function loadData() {
   renderStats(); renderCategories(); renderPills(); renderCards();
 }
 
-document.addEventListener('click', function(e) {
+// Expose the functions used by inline onclick= handlers in the HTML above.
+window.openAuthModal = openAuthModal;
+window.closeAuthModal = closeAuthModal;
+window.switchToLoginLayout = switchToLoginLayout;
+window.closeLoginModal = closeLoginModal;
+window.executeNeighborLogin = executeNeighborLogin;
+window.executePasswordRecoveryRequest = executePasswordRecoveryRequest;
+window.openProfileEditModal = openProfileEditModal;
+window.closeProfileEditModal = closeProfileEditModal;
+window.dispatchProfileOverwrites = dispatchProfileOverwrites;
+window.executeNavbarSessionLogout = executeNavbarSessionLogout;
+window.doSearch = doSearch;
+window.renderCards = renderCards;
+
+document.addEventListener('click', function (e) {
   const actionButton = e.target.closest('.btn-call, .btn-wa');
   if (actionButton) {
     const targetCard = actionButton.closest('.biz-card');
     const targetedBusiness = targetCard ? targetCard.getAttribute('data-name') : 'Desconocido';
     const contextActionType = actionButton.classList.contains('btn-call') ? 'Click_Llamar' : 'Click_WhatsApp';
-    
-    const userSessionToken = localStorage.getItem('mc_user_id');
-    if (!userSessionToken) {
+
+    if (!currentProfile) {
       e.preventDefault();
       e.stopPropagation();
       openAuthModal();
@@ -817,6 +754,10 @@ document.addEventListener('click', function(e) {
     }
   }
 }, true);
+
+document.getElementById('sortSelect').addEventListener('change', renderCards);
+
+supabase.auth.onAuthStateChange((_event, _session) => { evaluateUserSession(); });
 
 document.addEventListener('DOMContentLoaded', evaluateUserSession);
 loadData();
