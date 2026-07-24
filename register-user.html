@@ -158,8 +158,8 @@
 
       <div class="field">
         <label>Asigna tu Contraseña <span class="req">*</span></label>
-        <input type="password" id="f_password" required minlength="4" placeholder="••••••••">
-        <div class="hint">Usa una combinación sencilla para recordar tu acceso cuando cambies de dispositivo.</div>
+        <input type="password" id="f_password" required minlength="6" placeholder="••••••••">
+        <div class="hint">Mínimo 6 caracteres. Guárdala bien — es tu acceso real y seguro a la plataforma.</div>
       </div>
 
       <div class="field">
@@ -200,23 +200,12 @@
   </div>
 </div>
 
-<script>
-const GOOGLE_SCRIPT_API_URL = 'https://script.google.com/macros/s/AKfycbyvDoqy9S9kIm9CUbHRppPQ_AFH8D7gfilV1F9nLgkdwEuM9Zl1NuwiFSFy8dfir0VZ/exec';
-const USER_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRtiBEyirRS73NI23sRAllDT7g3aphl5uYmhDIRHKhzwjYDZD8c0YmNv19WfkBgHXZxTLlS5HnROUOz/pub?gid=488734005&single=true&output=csv';
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-function generateNeighborId() {
-  return 'USR-' + Math.floor(10000000 + Math.random() * 90000000);
-}
-
-function parseCSVLine(line) {
-  const result = []; let cur = ''; let inQ = false;
-  for (let i = 0; i < line.length; i++) {
-    if (line[i] === '"') { inQ = !inQ; }
-    else if (line[i] === ',' && !inQ) { result.push(cur); cur = ''; }
-    else cur += line[i];
-  }
-  result.push(cur); return result;
-}
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 function validateAndNext(step) {
   if (step === 1) {
@@ -234,102 +223,79 @@ function goToStep(n) {
   document.getElementById('step1-indicator').classList.toggle('done', n > 1);
   document.getElementById('line1').classList.toggle('done', n > 1);
   document.getElementById('step2-indicator').classList.toggle('active', n === 2);
-  window.scrollTo({top: 0, behavior: 'smooth'});
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ASYNCHRONOUS DUPLICATES EXCLUSION INTERCEPTOR ENGINE
 async function dispatchNeighborToSheets() {
   const targetBtn = document.getElementById('submitBtn');
-  
-  const whatsappInput = document.getElementById('f_whatsapp').value.trim().replace(/\D/g,'');
+
+  const whatsappInput = document.getElementById('f_whatsapp').value.trim().replace(/\D/g, '');
   const quartier = document.getElementById('f_quartier').value.trim();
   const password = document.getElementById('f_password').value;
   const source = document.getElementById('f_source').value;
   const emailInput = document.getElementById('f_email').value.trim().toLowerCase();
+  const neighborFirst = document.getElementById('f_nombre').value.trim();
+  const neighborLast = document.getElementById('f_apellido').value.trim();
 
   if (!whatsappInput || !quartier || !password || !source) {
     alert('Por favor completa todos los campos obligatorios de seguridad y contacto.');
     return;
   }
-
-  targetBtn.disabled = true;
-  targetBtn.textContent = 'Verificando exclusión de duplicados...';
-
-  try {
-    const res = await fetch(USER_SHEET_CSV_URL + '&cb=' + new Date().getTime());
-    if (!res.ok) throw new Error('Database cross-check anomaly');
-    const text = await res.text();
-    const lines = text.trim().split('\n');
-
-    let duplicateFound = false;
-    let duplicateType = '';
-
-    for (let i = 1; i < lines.length; i++) {
-      const cols = parseCSVLine(lines[i]);
-      if (cols.length < 4) continue;
-
-      const existingEmail = (cols[2] || '').trim().replace(/^"|"$/g,'').toLowerCase();
-      const existingPhone = (cols[3] || '').trim().replace(/^"|"$/g,'').replace(/\D/g,'');
-
-      if (existingEmail === emailInput) { duplicateFound = true; duplicateType = 'correo electrónico'; break; }
-      if (existingPhone === whatsappInput) { duplicateFound = true; duplicateType = 'número de WhatsApp'; break; }
-    }
-
-    if (duplicateFound) {
-      alert(`⚠️ Error de duplicado: Este ${duplicateType} ya se encuentra registrado en Marsella Conecta. Si ya eres miembro, por favor usa la opción de Iniciar Sesión.`);
-      targetBtn.disabled = false;
-      targetBtn.textContent = '✓ Completar Registro y Entrar';
-      return;
-    }
-
-  } catch(err) {
-    console.warn("Bypassing duplicate cross-check due to structural latency:", err);
+  if (password.length < 6) {
+    alert('Tu contraseña debe tener al menos 6 caracteres.');
+    return;
   }
 
-  targetBtn.textContent = 'Procesando credenciales comunitarias...';
-  const neighborFirst = document.getElementById('f_nombre').value.trim();
-  const neighborLast = document.getElementById('f_apellido').value.trim();
-  const generatedId = generateNeighborId();
+  targetBtn.disabled = true;
+  targetBtn.textContent = 'Creando tu cuenta...';
 
-  // FORCE IMMEDIATELY SYNCHRONOUS PERSISTENT LOG IN
-  localStorage.setItem('mc_user_id', generatedId);
-  localStorage.setItem('mc_user_name', neighborFirst);
-  localStorage.setItem('mc_user_zone', quartier);
-  localStorage.setItem('mc_user_email_saved', emailInput);
-  localStorage.setItem('mc_user_lastname_saved', neighborLast);
-
-  const neighborPayload = {
-    formType: "neighbor_registration",
-    "Nombre": neighborFirst,
-    "Apellido": neighborLast,
-    "Correo Electronico": emailInput,
-    "Numero Whatsapp": whatsappInput,
-    "Quartier": quartier,
-    "Donde nos encontraste": source,
-    "Estado": "Activo",
-    "Usarioid": generatedId,
-    "Clave": password
-  };
-
-  fetch(GOOGLE_SCRIPT_API_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(neighborPayload)
+  // All profile fields ride along as auth metadata, so the trigger on the
+  // database side can populate (or link to) your profile row immediately —
+  // this works whether or not email confirmation is required.
+  const { data, error } = await supabase.auth.signUp({
+    email: emailInput,
+    password,
+    options: {
+      data: {
+        nombre: neighborFirst,
+        apellido: neighborLast,
+        whatsapp: whatsappInput,
+        quartier,
+        source,
+      }
+    }
   });
 
-  setTimeout(() => {
-    document.getElementById('neighborForm').style.display = 'none';
-    document.getElementById('progressWrap').style.display = 'none';
-    
-    document.getElementById('outName').textContent = neighborFirst + ' ' + neighborLast;
-    document.getElementById('outId').textContent = generatedId;
-    document.getElementById('outZone').textContent = quartier;
-    
-    document.getElementById('successCard').classList.add('active');
-    window.scrollTo({top: 0, behavior: 'smooth'});
-  }, 600);
+  if (error) {
+    if (error.message?.toLowerCase().includes('already registered')) {
+      alert('Ese correo ya tiene una cuenta. Si ya te registraste antes, usa "Iniciar Sesión" en el directorio.');
+    } else {
+      alert('No se pudo crear tu cuenta: ' + error.message);
+    }
+    targetBtn.disabled = false;
+    targetBtn.textContent = '✓ Completar Registro y Entrar';
+    return;
+  }
+
+  document.getElementById('neighborForm').style.display = 'none';
+  document.getElementById('progressWrap').style.display = 'none';
+
+  document.getElementById('outName').textContent = neighborFirst + ' ' + neighborLast;
+  document.getElementById('outId').textContent = (data.user?.id || '').slice(0, 8).toUpperCase();
+  document.getElementById('outZone').textContent = quartier;
+
+  document.getElementById('successCard').classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (!data.session) {
+    // Email confirmation is turned on in Supabase Auth settings — let them know.
+    document.querySelector('#successCard p').textContent = 'Tu cuenta fue creada. Revisa tu correo y confirma tu dirección para poder iniciar sesión.';
+  }
 }
+
+window.validateAndNext = validateAndNext;
+window.goToStep = goToStep;
+window.dispatchNeighborToSheets = dispatchNeighborToSheets;
 </script>
 </body>
 </html>
