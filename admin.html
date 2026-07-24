@@ -99,6 +99,24 @@
   .checkbox-row input { width: auto; }
   .upload-status { font-size: 0.78rem; color: var(--ink-muted); margin-top: 6px; }
   .loading { text-align: center; padding: 40px; color: var(--ink-muted); font-size: 0.9rem; }
+
+  /* STATS TAB */
+  .stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; box-shadow: var(--card-shadow); }
+  .stat-card-num { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.6rem; color: var(--accent); }
+  .stat-card-label { font-size: 0.75rem; color: var(--ink-muted); margin-top: 4px; }
+  .stats-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  @media (max-width: 720px) { .stats-cols { grid-template-columns: 1fr; } }
+  .rank-list { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 6px 0; box-shadow: var(--card-shadow); }
+  .rank-item { display: flex; justify-content: space-between; align-items: center; padding: 9px 16px; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+  .rank-item:last-child { border-bottom: none; }
+  .rank-count { background: var(--bg); color: var(--ink); font-weight: 700; font-size: 0.75rem; padding: 2px 9px; border-radius: 10px; }
+  .activity-feed { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--card-shadow); max-height: 420px; overflow-y: auto; }
+  .activity-item { display: flex; justify-content: space-between; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); font-size: 0.8rem; }
+  .activity-item:last-child { border-bottom: none; }
+  .activity-type { font-weight: 700; }
+  .activity-detail { color: var(--ink-muted); }
+  .activity-time { color: var(--ink-muted); white-space: nowrap; font-size: 0.72rem; }
 </style>
 </head>
 <body>
@@ -131,6 +149,7 @@
       <button class="tab-btn active" data-tab="negocios" onclick="switchTab('negocios')">🏪 Negocios</button>
       <button class="tab-btn" data-tab="vecinos" onclick="switchTab('vecinos')">👥 Vecinos</button>
       <button class="tab-btn" data-tab="promos" onclick="switchTab('promos')">🔥 Promociones</button>
+      <button class="tab-btn" data-tab="stats" onclick="switchTab('stats')">📊 Estadísticas</button>
     </div>
 
     <!-- ---------- NEGOCIOS TAB ---------- -->
@@ -190,6 +209,39 @@
       </div>
 
       <div id="promoGridAdmin" class="promo-admin-grid"><div class="loading">Cargando promociones...</div></div>
+    </div>
+
+    <!-- ---------- ESTADÍSTICAS TAB ---------- -->
+    <div class="tab-panel" id="tab-stats">
+      <div class="panel-header">
+        <div class="panel-title">Estadísticas de Actividad</div>
+        <div class="filter-row">
+          <select class="search-mini" id="statsRange" onchange="loadStats()">
+            <option value="7">Últimos 7 días</option>
+            <option value="30" selected>Últimos 30 días</option>
+            <option value="90">Últimos 90 días</option>
+            <option value="0">Todo el historial</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="stat-cards" id="statCards">
+        <div class="loading">Cargando estadísticas...</div>
+      </div>
+
+      <div class="stats-cols">
+        <div>
+          <div class="panel-title" style="font-size:0.95rem;margin-bottom:10px">🔎 Términos más buscados</div>
+          <div class="rank-list" id="topSearches"></div>
+        </div>
+        <div>
+          <div class="panel-title" style="font-size:0.95rem;margin-bottom:10px">📞 Negocios más contactados</div>
+          <div class="rank-list" id="topBusinessClicks"></div>
+        </div>
+      </div>
+
+      <div class="panel-title" style="font-size:0.95rem;margin-bottom:10px">🕐 Actividad Reciente</div>
+      <div class="activity-feed" id="activityFeed"></div>
     </div>
   </div>
 </div>
@@ -267,6 +319,7 @@ window.switchTab = function(tab) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'stats') loadStats();
 };
 
 async function loadAll() {
@@ -588,6 +641,100 @@ window.submitPromotion = async function() {
 
   resetPromoForm();
   await loadPromotions();
+};
+
+// ================= ESTADÍSTICAS =================
+function timeAgo(dateStr) {
+  const diffMs = new Date() - new Date(dateStr);
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return 'ahora mismo';
+  if (mins < 60) return `hace ${mins} min`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `hace ${hrs} h`;
+  const days = Math.floor(hrs / 24);
+  return `hace ${days} día${days !== 1 ? 's' : ''}`;
+}
+
+const EVENT_LABELS = {
+  'Login_Exitoso': '🔑 Inicio de sesión',
+  'Cierre_Sesion': '🚪 Cierre de sesión',
+  'Busqueda_Palabra': '🔎 Búsqueda',
+  'Busqueda_Boton': '🔎 Búsqueda',
+  'Click_Llamar': '📞 Clic en Llamar',
+  'Click_WhatsApp': '💬 Clic en WhatsApp',
+  'Edicion_Perfil_Exitoso': '✏️ Edición de perfil',
+  'Solicitud_Recuperacion_Clave': '🔁 Solicitud de recuperación',
+};
+
+window.loadStats = async function loadStats() {
+  document.getElementById('statCards').innerHTML = '<div class="loading">Cargando estadísticas...</div>';
+  document.getElementById('topSearches').innerHTML = '';
+  document.getElementById('topBusinessClicks').innerHTML = '';
+  document.getElementById('activityFeed').innerHTML = '';
+
+  const rangeDays = parseInt(document.getElementById('statsRange').value);
+  let query = supabase.from('events_log').select('*').order('created_at', { ascending: false }).limit(5000);
+  if (rangeDays > 0) {
+    const since = new Date(Date.now() - rangeDays * 86400000).toISOString();
+    query = query.gte('created_at', since);
+  }
+  const { data, error } = await query;
+
+  if (error) {
+    document.getElementById('statCards').innerHTML = `<div class="empty-note">Error cargando estadísticas: ${error.message}</div>`;
+    return;
+  }
+
+  const events = data || [];
+
+  const searches = events.filter(e => e.evento_tipo === 'Busqueda_Palabra' || e.evento_tipo === 'Busqueda_Boton');
+  const logins = events.filter(e => e.evento_tipo === 'Login_Exitoso');
+  const logouts = events.filter(e => e.evento_tipo === 'Cierre_Sesion');
+  const bizClicks = events.filter(e => e.evento_tipo === 'Click_Llamar' || e.evento_tipo === 'Click_WhatsApp');
+
+  document.getElementById('statCards').innerHTML = `
+    <div class="stat-card"><div class="stat-card-num">${searches.length}</div><div class="stat-card-label">Búsquedas</div></div>
+    <div class="stat-card"><div class="stat-card-num">${logins.length}</div><div class="stat-card-label">Inicios de sesión</div></div>
+    <div class="stat-card"><div class="stat-card-num">${logouts.length}</div><div class="stat-card-label">Cierres de sesión</div></div>
+    <div class="stat-card"><div class="stat-card-num">${bizClicks.length}</div><div class="stat-card-label">Clics en negocios</div></div>
+    <div class="stat-card"><div class="stat-card-num">${events.length}</div><div class="stat-card-label">Eventos totales</div></div>
+  `;
+
+  // Top search terms
+  const searchCounts = {};
+  searches.forEach(e => {
+    const term = (e.valor_busqueda || '').trim();
+    if (!term) return;
+    searchCounts[term] = (searchCounts[term] || 0) + 1;
+  });
+  const topSearchList = Object.entries(searchCounts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  document.getElementById('topSearches').innerHTML = topSearchList.length
+    ? topSearchList.map(([term, count]) => `<div class="rank-item"><span>${term}</span><span class="rank-count">${count}</span></div>`).join('')
+    : '<div class="rank-item"><span style="color:var(--ink-muted)">Sin búsquedas registradas en este período.</span></div>';
+
+  // Top clicked businesses
+  const bizCounts = {};
+  bizClicks.forEach(e => {
+    const name = (e.negocio_nombre || 'Desconocido').trim();
+    bizCounts[name] = (bizCounts[name] || 0) + 1;
+  });
+  const topBizList = Object.entries(bizCounts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  document.getElementById('topBusinessClicks').innerHTML = topBizList.length
+    ? topBizList.map(([name, count]) => `<div class="rank-item"><span>${name}</span><span class="rank-count">${count}</span></div>`).join('')
+    : '<div class="rank-item"><span style="color:var(--ink-muted)">Sin clics registrados en este período.</span></div>';
+
+  // Recent activity feed (most recent 50)
+  const recent = events.slice(0, 50);
+  document.getElementById('activityFeed').innerHTML = recent.length
+    ? recent.map(e => {
+        const label = EVENT_LABELS[e.evento_tipo] || e.evento_tipo;
+        const detail = e.valor_busqueda || e.negocio_nombre || '';
+        return `<div class="activity-item">
+          <div><span class="activity-type">${label}</span>${detail ? `<span class="activity-detail"> — ${detail}</span>` : ''}</div>
+          <div class="activity-time">${timeAgo(e.created_at)}</div>
+        </div>`;
+      }).join('')
+    : '<div class="activity-item"><span style="color:var(--ink-muted)">Sin actividad registrada en este período.</span></div>';
 };
 
 checkAdminAndBoot();
