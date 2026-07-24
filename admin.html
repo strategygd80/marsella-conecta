@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Admin — Marsella Conecta</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f6f9; --surface: #ffffff; --ink: #101828; --ink-muted: #667085;
+    --accent: #0d67a7; --accent2: #159957; --accent3: #1c74b3; --warn: #e48727;
+    --danger: #dc2626; --border: #e3e7ee; --radius: 12px;
+    --card-shadow: 0 2px 12px rgba(16,24,40,0.06);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
+
+  nav {
+    position: sticky; top: 0; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; padding: 0 24px; height: 60px;
+    box-shadow: 0 1px 3px rgba(16,24,40,0.04);
+  }
+  .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; }
+  .nav-logo span { color: var(--accent); }
+  .nav-right { display: flex; align-items: center; gap: 12px; font-size: 0.82rem; color: var(--ink-muted); }
+  .btn-logout { background: none; border: 1.5px solid var(--border); border-radius: 20px; padding: 6px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; color: var(--ink); }
+  .btn-logout:hover { border-color: var(--danger); color: var(--danger); }
+
+  .shell { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
+
+  /* LOGIN GATE */
+  .login-shell { max-width: 380px; margin: 80px auto; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; text-align: center; box-shadow: var(--card-shadow); }
+  .login-shell h1 { font-family: 'Syne', sans-serif; font-size: 1.3rem; margin-bottom: 6px; }
+  .login-shell p { color: var(--ink-muted); font-size: 0.85rem; margin-bottom: 22px; }
+  .field { text-align: left; margin-bottom: 14px; }
+  .field label { display: block; font-size: 0.78rem; font-weight: 700; margin-bottom: 4px; }
+  .field input, .field select, .field textarea {
+    width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.88rem; background: var(--bg); outline: none;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); background: #fff; }
+  .field textarea { min-height: 70px; resize: vertical; }
+  .btn { display: inline-block; border: none; border-radius: 9px; padding: 10px 18px; font-weight: 700; font-size: 0.85rem; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.15s; }
+  .btn:hover { opacity: 0.88; }
+  .btn-primary { background: var(--accent); color: #fff; width: 100%; }
+  .btn-approve { background: var(--accent2); color: #fff; }
+  .btn-reject { background: var(--danger); color: #fff; }
+  .btn-save { background: var(--accent3); color: #fff; }
+  .btn-ghost { background: var(--bg); color: var(--ink); border: 1.5px solid var(--border); }
+  .btn-danger-outline { background: #fff; color: var(--danger); border: 1.5px solid var(--danger); }
+  .error-text { color: var(--danger); font-size: 0.8rem; margin-top: 8px; display: none; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 6px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .tab-btn { background: none; border: none; padding: 10px 16px; font-size: 0.88rem; font-weight: 700; color: var(--ink-muted); cursor: pointer; border-bottom: 2.5px solid transparent; font-family: 'DM Sans', sans-serif; }
+  .tab-btn.active { color: var(--accent); border-color: var(--accent); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+  .panel-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.2rem; }
+  .filter-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .filter-pill { padding: 6px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; border: 1.5px solid var(--border); background: var(--surface); cursor: pointer; }
+  .filter-pill.active { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .search-mini { padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.83rem; font-family: 'DM Sans', sans-serif; outline: none; min-width: 200px; }
+  .search-mini:focus { border-color: var(--accent); }
+
+  /* CARDS / ROWS */
+  .row-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 10px; box-shadow: var(--card-shadow); }
+  .row-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; cursor: pointer; }
+  .row-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; }
+  .row-meta { font-size: 0.78rem; color: var(--ink-muted); margin-top: 3px; }
+  .row-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .badge { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.4px; padding: 3px 9px; border-radius: 6px; text-transform: uppercase; white-space: nowrap; }
+  .badge-pending { background: #fff1e6; color: var(--warn); }
+  .badge-active { background: #e3f5eb; color: var(--accent2); }
+  .badge-rejected { background: #fde8e8; color: var(--danger); }
+  .badge-migrated { background: #fef3c7; color: #92600a; }
+  .row-actions { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; }
+  .row-actions .btn { padding: 7px 12px; font-size: 0.75rem; }
+  .row-detail { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .row-detail.active { display: block; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .private-box { background: var(--bg); border: 1px dashed var(--border); border-radius: 8px; padding: 10px 12px; font-size: 0.8rem; margin-bottom: 14px; }
+  .private-box strong { display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--ink-muted); margin-bottom: 4px; }
+  .empty-note { text-align: center; color: var(--ink-muted); font-size: 0.85rem; padding: 40px 0; }
+
+  /* PROMO CARDS */
+  .promo-admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .promo-admin-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--card-shadow); }
+  .promo-admin-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; background: var(--bg); display: block; }
+  .promo-admin-body { padding: 12px 14px; }
+  .promo-admin-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.88rem; margin-bottom: 8px; }
+  .promo-admin-actions { display: flex; gap: 6px; }
+
+  .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 24px; box-shadow: var(--card-shadow); }
+  .form-card h3 { font-family: 'Syne', sans-serif; font-size: 1rem; margin-bottom: 14px; }
+  .checkbox-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .checkbox-row input { width: auto; }
+  .upload-status { font-size: 0.78rem; color: var(--ink-muted); margin-top: 6px; }
+  .loading { text-align: center; padding: 40px; color: var(--ink-muted); font-size: 0.9rem; }
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN GATE ===================== -->
+<div id="loginScreen">
+  <nav><div class="nav-logo">Marsella<span>Conecta</span> · Admin</div><div></div></nav>
+  <div class="login-shell">
+    <h1>🔒 Panel de Administración</h1>
+    <p>Acceso restringido a administradores de Marsella Conecta.</p>
+    <div class="field"><label>Correo</label><input type="email" id="loginEmail" placeholder="admin@correo.com"></div>
+    <div class="field"><label>Contraseña</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
+    <button class="btn btn-primary" id="loginBtn" onclick="doAdminLogin()">Ingresar</button>
+    <div class="error-text" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ===================== DASHBOARD ===================== -->
+<div id="dashboard" style="display:none">
+  <nav>
+    <div class="nav-logo">Marsella<span>Conecta</span> · Admin</div>
+    <div class="nav-right">
+      <span id="adminEmailLabel"></span>
+      <button class="btn-logout" onclick="doAdminLogout()">Cerrar sesión</button>
+    </div>
+  </nav>
+
+  <div class="shell">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="negocios" onclick="switchTab('negocios')">🏪 Negocios</button>
+      <button class="tab-btn" data-tab="vecinos" onclick="switchTab('vecinos')">👥 Vecinos</button>
+      <button class="tab-btn" data-tab="promos" onclick="switchTab('promos')">🔥 Promociones</button>
+    </div>
+
+    <!-- ---------- NEGOCIOS TAB ---------- -->
+    <div class="tab-panel active" id="tab-negocios">
+      <div class="panel-header">
+        <div class="panel-title">Negocios</div>
+        <div class="filter-row">
+          <button class="filter-pill active" data-filter="Todos" onclick="setBizFilter('Todos')">Todos</button>
+          <button class="filter-pill" data-filter="Pendiente Validacion" onclick="setBizFilter('Pendiente Validacion')">Pendientes</button>
+          <button class="filter-pill" data-filter="Activo" onclick="setBizFilter('Activo')">Activos</button>
+          <button class="filter-pill" data-filter="Rechazado" onclick="setBizFilter('Rechazado')">Rechazados</button>
+          <input class="search-mini" id="bizSearch" placeholder="Buscar negocio..." oninput="renderBusinesses()">
+        </div>
+      </div>
+      <div id="bizList"><div class="loading">Cargando negocios...</div></div>
+    </div>
+
+    <!-- ---------- VECINOS TAB ---------- -->
+    <div class="tab-panel" id="tab-vecinos">
+      <div class="panel-header">
+        <div class="panel-title">Vecinos Registrados</div>
+        <input class="search-mini" id="userSearch" placeholder="Buscar vecino..." oninput="renderProfiles()">
+      </div>
+      <div id="userList"><div class="loading">Cargando vecinos...</div></div>
+    </div>
+
+    <!-- ---------- PROMOCIONES TAB ---------- -->
+    <div class="tab-panel" id="tab-promos">
+      <div class="panel-header"><div class="panel-title">Promociones / Banner</div></div>
+
+      <div class="form-card">
+        <h3 id="promoFormTitle">+ Nueva Promoción</h3>
+        <input type="hidden" id="promo_id">
+        <div class="field-row">
+          <div class="field"><label>Título *</label><input type="text" id="promo_titulo" placeholder="2x1 en Pupusas de Maíz"></div>
+          <div class="field"><label>Negocio</label><input type="text" id="promo_negocio" placeholder="Pupusería El Esfuerzo"></div>
+        </div>
+        <div class="field"><label>Descripción</label><textarea id="promo_descripcion" placeholder="Detalle opcional de la promoción..."></textarea></div>
+        <div class="field">
+          <label>Imagen (800×600px recomendado, &lt;300KB)</label>
+          <input type="file" id="promo_imagen_file" accept="image/*">
+          <div class="upload-status" id="promo_upload_status"></div>
+          <input type="hidden" id="promo_imagen_url">
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Texto del botón</label><input type="text" id="promo_cta_text" value="Ver Promoción"></div>
+          <div class="field"><label>Enlace del botón (WhatsApp, tel, etc.)</label><input type="text" id="promo_cta_url" placeholder="https://wa.me/50370000000"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Expira el (opcional)</label><input type="datetime-local" id="promo_expira"></div>
+          <div class="field"><label>Orden (menor = primero)</label><input type="number" id="promo_orden" value="0"></div>
+        </div>
+        <div class="checkbox-row"><input type="checkbox" id="promo_activo" checked><label for="promo_activo">Activo (visible en el sitio)</label></div>
+        <button class="btn btn-primary" id="promoSubmitBtn" onclick="submitPromotion()">Guardar Promoción</button>
+        <button class="btn btn-ghost" id="promoCancelBtn" onclick="resetPromoForm()" style="display:none;margin-left:8px">Cancelar edición</button>
+        <div class="error-text" id="promoError"></div>
+      </div>
+
+      <div id="promoGridAdmin" class="promo-admin-grid"><div class="loading">Cargando promociones...</div></div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const SUPABASE_URL = 'https://kydazssjktgsagayuupo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5ZGF6c3Nqa3Rnc2FnYXl1dXBvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NTg2NTYsImV4cCI6MjEwMDQzNDY1Nn0.YPXJ2cJjTcKZDPTo2o6Wkhs3-9CGZISujsPvAwKWpx4';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let businesses = [];
+let profiles = [];
+let promotions = [];
+let bizFilter = 'Todos';
+let expandedBizId = null;
+let expandedUserId = null;
+
+// ---------------- AUTH GATE ----------------
+async function checkAdminAndBoot() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return showLogin();
+
+  const { data: isAdmin } = await supabase.rpc('is_admin');
+  if (!isAdmin) {
+    await supabase.auth.signOut();
+    return showLogin('Esa cuenta no tiene permisos de administrador.');
+  }
+
+  document.getElementById('adminEmailLabel').textContent = session.user.email;
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  loadAll();
+}
+
+function showLogin(err) {
+  document.getElementById('loginScreen').style.display = 'block';
+  document.getElementById('dashboard').style.display = 'none';
+  const errEl = document.getElementById('loginError');
+  if (err) { errEl.textContent = err; errEl.style.display = 'block'; }
+}
+
+window.doAdminLogin = async function() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const btn = document.getElementById('loginBtn');
+  const errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+
+  if (!email || !password) {
+    errEl.textContent = 'Ingresa tu correo y contraseña.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Verificando...';
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  btn.disabled = false; btn.textContent = 'Ingresar';
+
+  if (error) {
+    errEl.textContent = 'Credenciales incorrectas.';
+    errEl.style.display = 'block';
+    return;
+  }
+  checkAdminAndBoot();
+};
+
+window.doAdminLogout = async function() {
+  await supabase.auth.signOut();
+  window.location.reload();
+};
+
+// ---------------- TABS ----------------
+window.switchTab = function(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+};
+
+async function loadAll() {
+  await Promise.all([loadBusinesses(), loadProfiles(), loadPromotions()]);
+}
+
+// ================= NEGOCIOS =================
+async function loadBusinesses() {
+  const { data: bizData, error } = await supabase.from('businesses').select('*').order('created_at', { ascending: false });
+  if (error) { document.getElementById('bizList').innerHTML = `<div class="empty-note">Error: ${error.message}</div>`; return; }
+
+  const { data: privData } = await supabase.from('business_private').select('*');
+  const privMap = {};
+  (privData || []).forEach(p => privMap[p.business_id] = p);
+
+  businesses = (bizData || []).map(b => ({ ...b, _private: privMap[b.id] || {} }));
+  renderBusinesses();
+}
+
+window.setBizFilter = function(f) {
+  bizFilter = f;
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.toggle('active', p.dataset.filter === f));
+  renderBusinesses();
+};
+
+function renderBusinesses() {
+  const q = (document.getElementById('bizSearch').value || '').toLowerCase().trim();
+  let list = businesses.filter(b => bizFilter === 'Todos' || b.estado === bizFilter);
+  if (q) list = list.filter(b => (b.nombre || '').toLowerCase().includes(q) || (b.barrio || '').toLowerCase().includes(q));
+
+  const el = document.getElementById('bizList');
+  if (!list.length) { el.innerHTML = '<div class="empty-note">No hay negocios en esta categoría.</div>'; return; }
+
+  el.innerHTML = list.map(b => {
+    const badgeClass = b.estado === 'Activo' ? 'badge-active' : (b.estado === 'Rechazado' ? 'badge-rejected' : 'badge-pending');
+    const isOpen = expandedBizId === b.id;
+    return `<div class="row-card">
+      <div class="row-top" onclick="window.toggleBiz('${b.id}')">
+        <div>
+          <div class="row-name">${b.nombre}</div>
+          <div class="row-meta">${b.categoria || ''}${b.barrio ? ' · ' + b.barrio : ''}${b.telefono ? ' · ' + b.telefono : ''}</div>
+          <div class="row-badges"><span class="badge ${badgeClass}">${b.estado}</span><span class="badge" style="background:#eef1f5;color:var(--ink-muted)">${b.plan || 'Gratuito'}</span></div>
+        </div>
+        <div class="row-actions" onclick="event.stopPropagation()">
+          ${b.estado !== 'Activo' ? `<button class="btn btn-approve" onclick="window.setBizStatus('${b.id}','Activo')">✓ Aprobar</button>` : ''}
+          ${b.estado !== 'Rechazado' ? `<button class="btn btn-reject" onclick="window.setBizStatus('${b.id}','Rechazado')">✕ Rechazar</button>` : ''}
+        </div>
+      </div>
+      <div class="row-detail ${isOpen ? 'active' : ''}" id="bizDetail-${b.id}">
+        ${(b._private.propietario || b._private.dui || b._private.email) ? `<div class="private-box">
+          <strong>Datos privados del propietario</strong>
+          ${b._private.propietario ? `Propietario: ${b._private.propietario}<br>` : ''}
+          ${b._private.dui ? `DUI: ${b._private.dui}<br>` : ''}
+          ${b._private.email ? `Email: ${b._private.email}` : ''}
+        </div>` : ''}
+        <div class="field-row">
+          <div class="field"><label>Nombre</label><input type="text" id="biz_nombre_${b.id}" value="${(b.nombre||'').replace(/"/g,'&quot;')}"></div>
+          <div class="field"><label>Categoría</label><input type="text" id="biz_categoria_${b.id}" value="${(b.categoria||'').replace(/"/g,'&quot;')}"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Barrio</label><input type="text" id="biz_barrio_${b.id}" value="${(b.barrio||'').replace(/"/g,'&quot;')}"></div>
+          <div class="field"><label>Teléfono</label><input type="text" id="biz_telefono_${b.id}" value="${(b.telefono||'').replace(/"/g,'&quot;')}"></div>
+        </div>
+        <div class="field"><label>Descripción</label><textarea id="biz_descripcion_${b.id}">${b.descripcion || ''}</textarea></div>
+        <div class="field-row">
+          <div class="field"><label>Horario</label><input type="text" id="biz_horario_${b.id}" value="${(b.horario||'').replace(/"/g,'&quot;')}"></div>
+          <div class="field"><label>Plan</label>
+            <select id="biz_plan_${b.id}">
+              <option value="Gratuito" ${b.plan==='Gratuito'?'selected':''}>Gratuito</option>
+              <option value="Básico" ${b.plan==='Básico'?'selected':''}>Básico</option>
+              <option value="Pro" ${b.plan==='Pro'?'selected':''}>Pro</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Estrellas</label><input type="number" step="0.1" min="0" max="5" id="biz_estrellas_${b.id}" value="${b.estrellas || 0}"></div>
+          <div class="field" style="display:flex;align-items:flex-end;gap:8px">
+            <button class="btn btn-save" onclick="window.saveBiz('${b.id}')">Guardar Cambios</button>
+            <button class="btn btn-danger-outline" onclick="window.deleteBiz('${b.id}')">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.toggleBiz = function(id) {
+  expandedBizId = expandedBizId === id ? null : id;
+  renderBusinesses();
+};
+
+window.setBizStatus = async function(id, estado) {
+  const { error } = await supabase.from('businesses').update({ estado }).eq('id', id);
+  if (error) { alert('Error: ' + error.message); return; }
+  await loadBusinesses();
+};
+
+window.saveBiz = async function(id) {
+  const payload = {
+    nombre: document.getElementById(`biz_nombre_${id}`).value.trim(),
+    categoria: document.getElementById(`biz_categoria_${id}`).value.trim(),
+    barrio: document.getElementById(`biz_barrio_${id}`).value.trim(),
+    telefono: document.getElementById(`biz_telefono_${id}`).value.trim(),
+    descripcion: document.getElementById(`biz_descripcion_${id}`).value.trim(),
+    horario: document.getElementById(`biz_horario_${id}`).value.trim(),
+    plan: document.getElementById(`biz_plan_${id}`).value,
+    estrellas: parseFloat(document.getElementById(`biz_estrellas_${id}`).value) || 0,
+  };
+  const { error } = await supabase.from('businesses').update(payload).eq('id', id);
+  if (error) { alert('Error guardando: ' + error.message); return; }
+  await loadBusinesses();
+};
+
+window.deleteBiz = async function(id) {
+  if (!confirm('¿Eliminar este negocio permanentemente? Esta acción no se puede deshacer.')) return;
+  const { error } = await supabase.from('businesses').delete().eq('id', id);
+  if (error) { alert('Error: ' + error.message); return; }
+  await loadBusinesses();
+};
+
+// ================= VECINOS =================
+async function loadProfiles() {
+  const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+  if (error) { document.getElementById('userList').innerHTML = `<div class="empty-note">Error: ${error.message}</div>`; return; }
+  profiles = data || [];
+  renderProfiles();
+}
+
+function renderProfiles() {
+  const q = (document.getElementById('userSearch').value || '').toLowerCase().trim();
+  let list = profiles;
+  if (q) list = list.filter(p => `${p.nombre||''} ${p.apellido||''} ${p.email||''}`.toLowerCase().includes(q));
+
+  const el = document.getElementById('userList');
+  if (!list.length) { el.innerHTML = '<div class="empty-note">No hay vecinos registrados.</div>'; return; }
+
+  el.innerHTML = list.map(p => {
+    const isOpen = expandedUserId === p.id;
+    const needsReset = p.migrated && !p.auth_user_id;
+    return `<div class="row-card">
+      <div class="row-top" onclick="window.toggleUser('${p.id}')">
+        <div>
+          <div class="row-name">${p.nombre || ''} ${p.apellido || ''}</div>
+          <div class="row-meta">${p.email || ''}${p.whatsapp ? ' · ' + p.whatsapp : ''}${p.quartier ? ' · ' + p.quartier : ''}</div>
+          <div class="row-badges">
+            <span class="badge ${p.estado === 'Activo' ? 'badge-active' : 'badge-rejected'}">${p.estado || 'Activo'}</span>
+            ${needsReset ? '<span class="badge badge-migrated">Pendiente de reset de clave</span>' : ''}
+          </div>
+        </div>
+      </div>
+      <div class="row-detail ${isOpen ? 'active' : ''}" id="userDetail-${p.id}">
+        <div class="field-row">
+          <div class="field"><label>Nombre</label><input type="text" id="usr_nombre_${p.id}" value="${(p.nombre||'').replace(/"/g,'&quot;')}"></div>
+          <div class="field"><label>Apellido</label><input type="text" id="usr_apellido_${p.id}" value="${(p.apellido||'').replace(/"/g,'&quot;')}"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>WhatsApp</label><input type="text" id="usr_whatsapp_${p.id}" value="${(p.whatsapp||'').replace(/"/g,'&quot;')}"></div>
+          <div class="field"><label>Quartier</label><input type="text" id="usr_quartier_${p.id}" value="${(p.quartier||'').replace(/"/g,'&quot;')}"></div>
+        </div>
+        <div class="field">
+          <label>Estado de la cuenta</label>
+          <select id="usr_estado_${p.id}">
+            <option value="Activo" ${p.estado==='Activo'?'selected':''}>Activo</option>
+            <option value="Suspendido" ${p.estado==='Suspendido'?'selected':''}>Suspendido</option>
+          </select>
+        </div>
+        <button class="btn btn-save" onclick="window.saveUser('${p.id}')">Guardar Cambios</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.toggleUser = function(id) {
+  expandedUserId = expandedUserId === id ? null : id;
+  renderProfiles();
+};
+
+window.saveUser = async function(id) {
+  const payload = {
+    nombre: document.getElementById(`usr_nombre_${id}`).value.trim(),
+    apellido: document.getElementById(`usr_apellido_${id}`).value.trim(),
+    whatsapp: document.getElementById(`usr_whatsapp_${id}`).value.trim(),
+    quartier: document.getElementById(`usr_quartier_${id}`).value.trim(),
+    estado: document.getElementById(`usr_estado_${id}`).value,
+  };
+  const { error } = await supabase.from('profiles').update(payload).eq('id', id);
+  if (error) { alert('Error guardando: ' + error.message); return; }
+  await loadProfiles();
+};
+
+// ================= PROMOCIONES =================
+async function loadPromotions() {
+  const { data, error } = await supabase.from('promotions').select('*').order('orden', { ascending: true });
+  if (error) { document.getElementById('promoGridAdmin').innerHTML = `<div class="empty-note">Error: ${error.message}</div>`; return; }
+  promotions = data || [];
+  renderPromoGrid();
+}
+
+function renderPromoGrid() {
+  const el = document.getElementById('promoGridAdmin');
+  if (!promotions.length) { el.innerHTML = '<div class="empty-note">Aún no hay promociones. Agrega la primera arriba.</div>'; return; }
+  el.innerHTML = promotions.map(p => `
+    <div class="promo-admin-card">
+      ${p.imagen_url ? `<img class="promo-admin-img" src="${p.imagen_url}" alt="">` : '<div class="promo-admin-img"></div>'}
+      <div class="promo-admin-body">
+        <div class="promo-admin-title">${p.titulo}</div>
+        <div class="row-badges" style="margin-bottom:10px">
+          <span class="badge ${p.activo ? 'badge-active' : 'badge-rejected'}">${p.activo ? 'Activo' : 'Oculto'}</span>
+        </div>
+        <div class="promo-admin-actions">
+          <button class="btn btn-ghost" onclick="window.editPromo('${p.id}')">Editar</button>
+          <button class="btn ${p.activo ? 'btn-reject' : 'btn-approve'}" onclick="window.togglePromoActive('${p.id}', ${!p.activo})">${p.activo ? 'Ocultar' : 'Activar'}</button>
+          <button class="btn btn-danger-outline" onclick="window.deletePromo('${p.id}')">Eliminar</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+window.editPromo = function(id) {
+  const p = promotions.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('promo_id').value = p.id;
+  document.getElementById('promo_titulo').value = p.titulo || '';
+  document.getElementById('promo_negocio').value = p.negocio_nombre || '';
+  document.getElementById('promo_descripcion').value = p.descripcion || '';
+  document.getElementById('promo_imagen_url').value = p.imagen_url || '';
+  document.getElementById('promo_upload_status').textContent = p.imagen_url ? 'Imagen actual conservada (sube un archivo nuevo para reemplazarla).' : '';
+  document.getElementById('promo_cta_text').value = p.cta_text || 'Ver Promoción';
+  document.getElementById('promo_cta_url').value = p.cta_url || '';
+  document.getElementById('promo_expira').value = p.expira_at ? p.expira_at.slice(0, 16) : '';
+  document.getElementById('promo_orden').value = p.orden || 0;
+  document.getElementById('promo_activo').checked = !!p.activo;
+  document.getElementById('promoFormTitle').textContent = '✏️ Editando: ' + p.titulo;
+  document.getElementById('promoSubmitBtn').textContent = 'Actualizar Promoción';
+  document.getElementById('promoCancelBtn').style.display = 'inline-block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+window.resetPromoForm = function() {
+  document.getElementById('promo_id').value = '';
+  document.getElementById('promo_titulo').value = '';
+  document.getElementById('promo_negocio').value = '';
+  document.getElementById('promo_descripcion').value = '';
+  document.getElementById('promo_imagen_url').value = '';
+  document.getElementById('promo_imagen_file').value = '';
+  document.getElementById('promo_upload_status').textContent = '';
+  document.getElementById('promo_cta_text').value = 'Ver Promoción';
+  document.getElementById('promo_cta_url').value = '';
+  document.getElementById('promo_expira').value = '';
+  document.getElementById('promo_orden').value = 0;
+  document.getElementById('promo_activo').checked = true;
+  document.getElementById('promoFormTitle').textContent = '+ Nueva Promoción';
+  document.getElementById('promoSubmitBtn').textContent = 'Guardar Promoción';
+  document.getElementById('promoCancelBtn').style.display = 'none';
+};
+
+window.togglePromoActive = async function(id, activo) {
+  const { error } = await supabase.from('promotions').update({ activo }).eq('id', id);
+  if (error) { alert('Error: ' + error.message); return; }
+  await loadPromotions();
+};
+
+window.deletePromo = async function(id) {
+  if (!confirm('¿Eliminar esta promoción?')) return;
+  const { error } = await supabase.from('promotions').delete().eq('id', id);
+  if (error) { alert('Error: ' + error.message); return; }
+  await loadPromotions();
+};
+
+window.submitPromotion = async function() {
+  const id = document.getElementById('promo_id').value;
+  const titulo = document.getElementById('promo_titulo').value.trim();
+  const errEl = document.getElementById('promoError');
+  errEl.style.display = 'none';
+
+  if (!titulo) { errEl.textContent = 'El título es obligatorio.'; errEl.style.display = 'block'; return; }
+
+  const btn = document.getElementById('promoSubmitBtn');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+
+  let imagenUrl = document.getElementById('promo_imagen_url').value;
+  const file = document.getElementById('promo_imagen_file').files[0];
+
+  if (file) {
+    document.getElementById('promo_upload_status').textContent = 'Subiendo imagen...';
+    const ext = file.name.split('.').pop();
+    const path = `promo-${Date.now()}.${ext}`;
+    const { error: uploadErr } = await supabase.storage.from('promo-images').upload(path, file, { upsert: true });
+    if (uploadErr) {
+      errEl.textContent = 'Error subiendo imagen: ' + uploadErr.message;
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = id ? 'Actualizar Promoción' : 'Guardar Promoción';
+      return;
+    }
+    const { data: pub } = supabase.storage.from('promo-images').getPublicUrl(path);
+    imagenUrl = pub.publicUrl;
+    document.getElementById('promo_upload_status').textContent = '✓ Imagen subida.';
+  }
+
+  const payload = {
+    titulo,
+    negocio_nombre: document.getElementById('promo_negocio').value.trim() || null,
+    descripcion: document.getElementById('promo_descripcion').value.trim() || null,
+    imagen_url: imagenUrl || null,
+    cta_text: document.getElementById('promo_cta_text').value.trim() || 'Ver Promoción',
+    cta_url: document.getElementById('promo_cta_url').value.trim() || null,
+    expira_at: document.getElementById('promo_expira').value || null,
+    orden: parseInt(document.getElementById('promo_orden').value) || 0,
+    activo: document.getElementById('promo_activo').checked,
+  };
+
+  const { error } = id
+    ? await supabase.from('promotions').update(payload).eq('id', id)
+    : await supabase.from('promotions').insert(payload);
+
+  btn.disabled = false; btn.textContent = id ? 'Actualizar Promoción' : 'Guardar Promoción';
+
+  if (error) { errEl.textContent = 'Error: ' + error.message; errEl.style.display = 'block'; return; }
+
+  resetPromoForm();
+  await loadPromotions();
+};
+
+checkAdminAndBoot();
+</script>
+</body>
+</html>
