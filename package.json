@@ -1,0 +1,13 @@
+{
+  "name": "marsella-conecta-migration",
+  "version": "1.0.0",
+  "private": true,
+  "description": "One-time script to migrate Marsella Conecta data from Google Sheets to Supabase",
+  "main": "migrate-from-sheets.js",
+  "scripts": {
+    "migrate": "node migrate-from-sheets.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  }
+}
