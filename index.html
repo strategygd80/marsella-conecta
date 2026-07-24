@@ -11,10 +11,10 @@
     --surface: #ffffff;
     --ink: #101828;
     --ink-muted: #667085;
-    --accent: #2563eb;
-    --accent2: #0d9488;
-    --accent3: #1e3a8a;
-    --warn: #f97316;
+    --accent: #0d67a7;
+    --accent2: #159957;
+    --accent3: #1c74b3;
+    --warn: #e48727;
     --gold: #c9a84c;
     --border: #e3e7ee;
     --card-shadow: 0 2px 12px rgba(16,24,40,0.06);
@@ -40,7 +40,7 @@
     color: var(--ink-muted); text-decoration: none; font-size: 0.82rem; font-weight: 600;
     padding: 6px 14px; border-radius: 20px; transition: all 0.2s;
   }
-  .nav-links a:hover, .nav-links a.active { background: #eef2ff; color: var(--accent); }
+  .nav-links a:hover, .nav-links a.active { background: #e4eef5; color: var(--accent); }
   
   /* AUTH COMPONENT NAVIGATION CONTAINER */
   .nav-actions { display: flex; align-items: center; gap: 10px; }
@@ -73,18 +73,18 @@
   }
   .hero::before {
     content: ''; position: absolute; inset: 0;
-    background: radial-gradient(ellipse 70% 60% at 50% 120%, rgba(37,99,235,0.28) 0%, transparent 70%);
+    background: radial-gradient(ellipse 70% 60% at 50% 120%, rgba(13,103,167,0.28) 0%, transparent 70%);
   }
   .hero-eyebrow {
-    display: inline-block; background: rgba(37,99,235,0.15); border: 1px solid rgba(37,99,235,0.3);
-    color: #93b4fb; font-size: 0.72rem; font-weight: 600; letter-spacing: 1.5px;
+    display: inline-block; background: rgba(13,103,167,0.15); border: 1px solid rgba(13,103,167,0.3);
+    color: #7ec2e8; font-size: 0.72rem; font-weight: 600; letter-spacing: 1.5px;
     text-transform: uppercase; padding: 5px 14px; border-radius: 20px; margin-bottom: 18px;
   }
   .hero h1 {
     font-family: 'Syne', sans-serif; font-size: clamp(2rem, 6vw, 3.2rem);
     font-weight: 800; color: #fff; line-height: 1.1; margin-bottom: 14px; position: relative;
   }
-  .hero h1 em { color: #6c9bff; font-style: normal; }
+  .hero h1 em { color: #5fb0dd; font-style: normal; }
   .hero p { color: rgba(255,255,255,0.6); font-size: 1rem; max-width: 480px; margin: 0 auto 28px; }
   .search-wrap { max-width: 540px; margin: 0 auto; position: relative; text-align: left; }
   .search-wrap input {
@@ -151,7 +151,7 @@
   .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; }
   .cat-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px 8px; text-align: center; cursor: pointer; transition: all 0.2s; user-select: none; }
   .cat-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--card-shadow); }
-  .cat-card.active { border-color: var(--accent); background: #eef2ff; }
+  .cat-card.active { border-color: var(--accent); background: #e4eef5; }
   .cat-icon { font-size: 1.6rem; margin-bottom: 6px; }
   .cat-name { font-size: 0.7rem; font-weight: 600; color: var(--ink); }
 
@@ -178,13 +178,13 @@
   @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
 
   .biz-header { padding: 16px 16px 0; display: flex; align-items: flex-start; gap: 12px; }
-  .biz-avatar { width: 46px; height: 46px; border-radius: 10px; flex-shrink: 0; background: linear-gradient(135deg, var(--accent) 0%, #60a5fa 100%); display: grid; place-items: center; font-size: 1.3rem; }
+  .biz-avatar { width: 46px; height: 46px; border-radius: 10px; flex-shrink: 0; background: linear-gradient(135deg, var(--accent) 0%, var(--accent3) 100%); display: grid; place-items: center; font-size: 1.3rem; }
   .biz-meta { flex: 1; min-width: 0; }
   .biz-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .biz-cat-barrio { font-size: 0.75rem; color: var(--ink-muted); margin-top: 2px; }
   .biz-badges { display: flex; gap: 5px; margin-top: 6px; flex-wrap: wrap; }
   .badge { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.5px; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; }
-  .badge-verified { background: #e6f4ee; color: var(--accent2); }
+  .badge-verified { background: #e3f5eb; color: var(--accent2); }
   .badge-new { background: #fff3cd; color: #92600a; }
   .badge-featured { background: #fff1e6; color: var(--warn); }
   .badge-premium { background: #1a1714; color: var(--gold); }
