@@ -670,10 +670,10 @@ function renderSearchDropdown(q) {
   if (!matches.length) { dropdown.classList.remove('active'); dropdown.innerHTML = ''; return; }
 
   dropdown.innerHTML = matches.map(r => `
-    <div class="search-dropdown-item" onclick="window.selectSearchResult('${r.nombre.replace(/'/g,"\\'")}')">
+    <div class="search-dropdown-item" onclick="window.selectSearchResult('${(r.nombre || '').replace(/'/g,"\\'")}')">
       <div class="search-dropdown-icon">${CATEGORY_ICONS[r.categoria] || FALLBACK_ICON}</div>
       <div>
-        <div class="search-dropdown-name">${r.nombre}</div>
+        <div class="search-dropdown-name">${r.nombre || ''}</div>
         <div class="search-dropdown-meta">${r.categoria || ''}${r.barrio ? ' · ' + r.barrio : ''}</div>
       </div>
     </div>`).join('');
@@ -716,7 +716,7 @@ document.getElementById('searchInput').addEventListener('focus', function() { re
 function cleanPhone(t) { return (t || '').replace(/\D/g, ''); }
 
 function generateCardHtml(r, index) {
-  const name = r.nombre;
+  const name = r.nombre || 'Negocio';
   const cat = r.categoria;
   const barrio = r.barrio;
   const tel = cleanPhone(r.telefono);
