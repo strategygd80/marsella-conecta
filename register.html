@@ -202,15 +202,10 @@
         </div>
       </div>
 
-      <div class="field-row">
-        <div class="field">
-          <label>Correo electrónico <span class="req">*</span></label>
-          <input type="email" id="f_email" placeholder="ejemplo@correo.com">
-        </div>
-        <div class="field">
-          <label>Contraseña de Gestión <span class="req">*</span></label>
-          <input type="password" id="f_password" required minlength="4" placeholder="••••••••">
-        </div>
+      <div class="field">
+        <label>Correo electrónico <span class="req">*</span></label>
+        <input type="email" id="f_email" required placeholder="ejemplo@correo.com">
+        <div class="hint">Usaremos este correo únicamente para validar tu ficha. Para administrar tu negocio, crea (o usa) tu cuenta de vecino en "Unirte Ahora".</div>
       </div>
 
       <div class="field">
@@ -281,7 +276,7 @@
       <div class="badge-line"><span>Establecimiento:</span> <strong id="outBiz">—</strong></div>
       <div class="badge-line"><span>ID de Ficha:</span> <strong id="outId">—</strong></div>
       <div class="badge-line"><span>Estatus Operativo:</span> <strong>Pendiente Validación</strong></div>
-      <div class="badge-line"><span>Panel de Control:</span> <strong>Clave de propietario activada</strong></div>
+      <div class="badge-line"><span>Panel de Control:</span> <strong>Crea tu cuenta de vecino para administrar tu ficha</strong></div>
     </div>
 
     <div class="success-actions">
@@ -290,12 +285,12 @@
   </div>
 </div>
 
-<script>
-const ACTIVE_URL = 'https://script.google.com/macros/s/AKfycbyvDoqy9S9kIm9CUbHRppPQ_AFH8D7gfilV1F9nLgkdwEuM9Zl1NuwiFSFy8dfir0VZ/exec';
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-function createCryptoUserId() {
-  return 'BIZ-' + Math.floor(10000000 + Math.random() * 90000000);
-}
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 function validateAndNext(step) {
   if (step === 1) {
@@ -305,8 +300,8 @@ function validateAndNext(step) {
     }
     goToStep(2);
   } else if (step === 2) {
-    if (!document.getElementById('f_owner').value.trim() || !document.getElementById('f_email').value.trim() || !document.getElementById('f_password').value) {
-      alert('Los datos del propietario, correo y la contraseña de gestión son requeridos.');
+    if (!document.getElementById('f_owner').value.trim() || !document.getElementById('f_email').value.trim()) {
+      alert('El nombre del propietario y el correo son requeridos.');
       return;
     }
     goToStep(3);
@@ -322,57 +317,61 @@ function goToStep(n) {
   document.getElementById('step2-indicator').classList.toggle('done', n > 2);
   document.getElementById('line2').classList.toggle('done', n > 2);
   document.getElementById('step3-indicator').classList.toggle('active', n === 3);
-  window.scrollTo({top: 0, behavior: 'smooth'});
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function dispatchDirectToSheets() {
+async function dispatchDirectToSheets() {
   const targetBtn = document.getElementById('submitBtn');
   targetBtn.disabled = true;
-  targetBtn.textContent = 'Inyectando fila en base de datos...';
+  targetBtn.textContent = 'Guardando ficha...';
 
   const businessName = document.getElementById('f_nombre').value.trim();
   const selectedTier = document.querySelector('input[name="plan"]:checked')?.value || 'Gratuito';
 
-  const systemUserId = createCryptoUserId();
-  const currentTimestamp = new Date().toLocaleString("es-SV", {timeZone: "America/El_Salvador"});
+  const { data: biz, error: bizErr } = await supabase
+    .from('businesses')
+    .insert({
+      nombre: businessName,
+      categoria: document.getElementById('f_cat').value,
+      barrio: document.getElementById('f_barrio').value,
+      telefono: document.getElementById('f_tel').value.trim(),
+      descripcion: document.getElementById('f_desc').value || null,
+      horario: document.getElementById('f_horario').value || null,
+      origen: document.getElementById('f_source').value || null,
+      plan: selectedTier,
+    })
+    .select('id')
+    .single();
 
-  const datasetPayload = {
-    formType: "business_registration", 
-    Fecha_Registration: currentTimestamp, 
-    Nombre: businessName,
-    Categoría: document.getElementById('f_cat').value,
-    Barrio: document.getElementById('f_barrio').value,
-    Teléfono: document.getElementById('f_tel').value.trim(),
-    Descripción: document.getElementById('f_desc').value || 'Sin descripción',
-    Estado: "Pendiente Validacion",
-    Horario: document.getElementById('f_horario').value || 'No especificado',
-    Origen: document.getElementById('f_source').value || 'No especificado',
-    Plan: selectedTier,
-    Propietario: document.getElementById('f_owner').value,
-    DUI: document.getElementById('f_dui').value || 'No provisto',
-    Email: document.getElementById('f_email').value,
-    Usuarioid: systemUserId,
-    Clave: document.getElementById('f_password').value
-  };
+  if (bizErr) {
+    alert('Hubo un problema guardando tu registro: ' + bizErr.message);
+    targetBtn.disabled = false;
+    targetBtn.textContent = '✓ Finalizar Registro';
+    return;
+  }
 
-  fetch(ACTIVE_URL, {
-    method: 'POST',
-    mode: 'no-cors', 
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(datasetPayload)
+  // Sensitive owner details go in a write-only table only admins can read.
+  const { error: privErr } = await supabase.from('business_private').insert({
+    business_id: biz.id,
+    propietario: document.getElementById('f_owner').value.trim(),
+    dui: document.getElementById('f_dui').value.trim() || null,
+    email: document.getElementById('f_email').value.trim(),
   });
+  if (privErr) console.warn('Owner detail save failed:', privErr.message);
 
-  setTimeout(() => {
-    document.getElementById('registrationForm').style.display = 'none';
-    document.getElementById('progressWrap').style.display = 'none';
-    
-    document.getElementById('outBiz').textContent = businessName;
-    document.getElementById('outId').textContent = systemUserId;
-    
-    document.getElementById('successCard').classList.add('active');
-    window.scrollTo({top: 0, behavior: 'smooth'});
-  }, 600);
+  document.getElementById('registrationForm').style.display = 'none';
+  document.getElementById('progressWrap').style.display = 'none';
+
+  document.getElementById('outBiz').textContent = businessName;
+  document.getElementById('outId').textContent = biz.id.slice(0, 8).toUpperCase();
+
+  document.getElementById('successCard').classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+window.validateAndNext = validateAndNext;
+window.goToStep = goToStep;
+window.dispatchDirectToSheets = dispatchDirectToSheets;
 </script>
 </body>
 </html>
