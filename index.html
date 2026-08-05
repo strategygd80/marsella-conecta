@@ -117,7 +117,8 @@
   }
   .search-dropdown-item:last-child { border-bottom: none; }
   .search-dropdown-item:hover { background: var(--bg); }
-  .search-dropdown-icon { font-size: 1.1rem; flex-shrink: 0; }
+  .search-dropdown-icon { width: 30px; height: 30px; flex-shrink: 0; border-radius: 8px; background: #e4eef5; color: var(--accent); display: grid; place-items: center; }
+  .search-dropdown-icon svg { width: 16px; height: 16px; }
   .search-dropdown-name { font-size: 0.85rem; font-weight: 600; color: var(--ink); }
   .search-dropdown-meta { font-size: 0.72rem; color: var(--ink-muted); }
 
@@ -152,7 +153,9 @@
   .cat-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px 8px; text-align: center; cursor: pointer; transition: all 0.2s; user-select: none; }
   .cat-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--card-shadow); }
   .cat-card.active { border-color: var(--accent); background: #e4eef5; }
-  .cat-icon { font-size: 1.6rem; margin-bottom: 6px; }
+  .cat-icon { width: 40px; height: 40px; margin: 0 auto 8px; border-radius: 50%; background: #e4eef5; color: var(--accent); display: grid; place-items: center; }
+  .cat-icon svg { width: 20px; height: 20px; }
+  .cat-card.active .cat-icon { background: var(--accent); color: #fff; }
   .cat-name { font-size: 0.7rem; font-weight: 600; color: var(--ink); }
 
   /* PILLS */
@@ -178,7 +181,9 @@
   @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
 
   .biz-header { padding: 16px 16px 0; display: flex; align-items: flex-start; gap: 12px; }
-  .biz-avatar { width: 46px; height: 46px; border-radius: 10px; flex-shrink: 0; background: linear-gradient(135deg, var(--accent) 0%, var(--accent3) 100%); display: grid; place-items: center; font-size: 1.3rem; }
+  .biz-avatar { width: 46px; height: 46px; border-radius: 10px; flex-shrink: 0; background: linear-gradient(135deg, var(--accent) 0%, var(--accent3) 100%); display: grid; place-items: center; overflow: hidden; }
+  .biz-avatar svg { width: 22px; height: 22px; color: #fff; }
+  .biz-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .biz-meta { flex: 1; min-width: 0; }
   .biz-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .biz-cat-barrio { font-size: 0.75rem; color: var(--ink-muted); margin-top: 2px; }
@@ -421,6 +426,28 @@ const CATEGORY_ICONS = {
 };
 const FALLBACK_ICON = '📦';
 
+// Clean line-icon SVGs (24x24, stroke-based) used in place of emoji
+// wherever we want a more polished, consistent visual — category
+// cards, the search dropdown, and business avatars without a photo.
+const CATEGORY_SVG = {
+  'Transporte': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14M5 17a2 2 0 1 0 4 0M5 17a2 2 0 1 1 4 0M15 17a2 2 0 1 0 4 0M15 17a2 2 0 1 1 4 0M3 17V10l2-5h10l4 5v7"/><path d="M3 10h16"/></svg>',
+  'Alimentacion': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v6a2 2 0 0 0 4 0V2M9 8v14M18 2c-2 1-3 3-3 6s1 5 3 6v6"/></svg>',
+  'Servicios Otros': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 1 0-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2-2z"/></svg>',
+  'Bebidas': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10h12l-1.2 9a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 10Z"/><path d="M8 10V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v5"/></svg>',
+  'Instalacion AC': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M4.5 6.5l15 11M19.5 6.5l-15 11"/></svg>',
+  'Plomería': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s5 5.5 5 9.5a5 5 0 0 1-10 0C7 8.5 12 3 12 3Z"/></svg>',
+  'Electricidad': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg>',
+  'Mecánica': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 1 0-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2-2z"/></svg>',
+  'Belleza': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="m20 4-14 8 14 8M8.5 12h11.5"/></svg>',
+  'Farmacia': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 8v8M8 12h8"/></svg>',
+  'Tienda': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8 5.5 3h13L20 8M4 8v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V8M4 8h16M9 12a3 3 0 0 0 6 0"/></svg>',
+  'Médico': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 13.6 12 22l-8.8-8.4a5.5 5.5 0 0 1 8-7.6l.8.8.8-.8a5.5 5.5 0 0 1 8 7.6Z"/></svg>',
+  'Servicios Tecnicos/ Hogar': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 12 4l9 7M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"/></svg>',
+};
+const FALLBACK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/></svg>';
+
+function getCategorySvg(cat) { return CATEGORY_SVG[cat] || FALLBACK_SVG; }
+
 const SAMPLE_DATA = [
   { nombre: 'VIP Taxi Marsella', categoria: 'Transporte', barrio: 'Colonia Marsella', telefono: '75404955', descripcion: 'Servicio de taxi 24/7 para toda la zona', estado: 'Activo', estrellas: 5, horario: 'Todos los días 6am-10pm', plan: 'Gratuito' }
 ];
@@ -618,7 +645,7 @@ function renderCategories() {
   const grid = document.getElementById('catGrid');
   grid.innerHTML = cats.map(c => `
     <div class="cat-card" data-cat="${c}" onclick="window.filterByCategory('${c.replace(/'/g,"\\'")}')">
-      <div class="cat-icon">${CATEGORY_ICONS[c] || FALLBACK_ICON}</div>
+      <div class="cat-icon">${getCategorySvg(c)}</div>
       <div class="cat-name">${c}</div>
     </div>`).join('');
 }
@@ -671,7 +698,7 @@ function renderSearchDropdown(q) {
 
   dropdown.innerHTML = matches.map(r => `
     <div class="search-dropdown-item" onclick="window.selectSearchResult('${(r.nombre || '').replace(/'/g,"\\'")}')">
-      <div class="search-dropdown-icon">${CATEGORY_ICONS[r.categoria] || FALLBACK_ICON}</div>
+      <div class="search-dropdown-icon">${getCategorySvg(r.categoria)}</div>
       <div>
         <div class="search-dropdown-name">${r.nombre || ''}</div>
         <div class="search-dropdown-meta">${r.categoria || ''}${r.barrio ? ' · ' + r.barrio : ''}</div>
@@ -725,7 +752,8 @@ function generateCardHtml(r, index) {
   const stars = parseFloat(r.estrellas) || 0;
   const hours = r.horario;
   const plan = (r.plan || '').toLowerCase();
-  const icon = CATEGORY_ICONS[cat] || FALLBACK_ICON;
+  const icon = getCategorySvg(cat);
+  const avatarContent = r.imagen_url ? `<img src="${r.imagen_url}" alt="${name}" loading="lazy">` : icon;
   const isVerified = ['activo', 'verificado', 'active'].includes(status);
   const isFeatured = plan.includes('pro') || plan.includes('premium') || plan.includes('destacado');
 
@@ -737,7 +765,7 @@ function generateCardHtml(r, index) {
 
   return `<div class="biz-card" data-name="${name}" style="animation-delay:${index*0.03}s">
     <div class="biz-header">
-      <div class="biz-avatar">${icon}</div>
+      <div class="biz-avatar">${avatarContent}</div>
       <div class="biz-meta">
         <div class="biz-name">${name}</div>
         <div class="biz-cat-barrio">${cat}${barrio ? ' · ' + barrio : ''}</div>
@@ -814,12 +842,25 @@ async function loadData() {
       .order('created_at', { ascending: true });
     if (error) throw error;
     allData = (data && data.length) ? data : SAMPLE_DATA;
+    if (!data || !data.length) showDataWarning('El directorio está vacío o no se pudo conectar — mostrando un negocio de ejemplo.');
   } catch (e) {
     console.warn('Using sample data:', e);
     allData = SAMPLE_DATA;
+    showDataWarning('No se pudo conectar con la base de datos (' + (e.message || 'error desconocido') + '). Mostrando datos de ejemplo — recarga la página o avisa al administrador.');
   }
   filtered = [...allData];
   renderStats(); renderCategories(); renderPills(); renderCards(); renderSearchChips();
+}
+
+function showDataWarning(msg) {
+  let el = document.getElementById('dataWarningBanner');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'dataWarningBanner';
+    el.style.cssText = 'background:#fde8e8;color:#b91c1c;font-size:0.8rem;font-weight:600;text-align:center;padding:8px 16px;';
+    document.querySelector('.stats-bar').insertAdjacentElement('afterend', el);
+  }
+  el.textContent = '⚠️ ' + msg;
 }
 
 function daysUntil(dateStr) {
