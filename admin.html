@@ -394,6 +394,12 @@ function renderBusinesses() {
             </select>
           </div>
         </div>
+        <div class="field">
+          <label>Foto del negocio</label>
+          ${b.imagen_url ? `<img src="${b.imagen_url}" alt="" style="width:100%;max-width:220px;aspect-ratio:4/3;object-fit:cover;border-radius:8px;margin-bottom:8px;display:block">` : ''}
+          <input type="file" id="biz_imagen_file_${b.id}" accept="image/*">
+          <div class="upload-status" id="biz_upload_status_${b.id}"></div>
+        </div>
         <div class="field-row">
           <div class="field"><label>Estrellas</label><input type="number" step="0.1" min="0" max="5" id="biz_estrellas_${b.id}" value="${b.estrellas || 0}"></div>
           <div class="field" style="display:flex;align-items:flex-end;gap:8px">
@@ -418,6 +424,7 @@ window.setBizStatus = async function(id, estado) {
 };
 
 window.saveBiz = async function(id) {
+  const statusEl = document.getElementById(`biz_upload_status_${id}`);
   const payload = {
     nombre: document.getElementById(`biz_nombre_${id}`).value.trim(),
     categoria: document.getElementById(`biz_categoria_${id}`).value.trim(),
@@ -428,6 +435,24 @@ window.saveBiz = async function(id) {
     plan: document.getElementById(`biz_plan_${id}`).value,
     estrellas: parseFloat(document.getElementById(`biz_estrellas_${id}`).value) || 0,
   };
+
+  const fileInput = document.getElementById(`biz_imagen_file_${id}`);
+  const file = fileInput?.files[0];
+  if (file) {
+    statusEl.textContent = 'Subiendo foto...';
+    const ext = file.name.split('.').pop();
+    const path = `biz-${id}-${Date.now()}.${ext}`;
+    const { error: uploadErr } = await supabase.storage.from('business-images').upload(path, file, { upsert: true });
+    if (uploadErr) {
+      statusEl.textContent = '';
+      alert('Error subiendo la foto: ' + uploadErr.message);
+      return;
+    }
+    const { data: pub } = supabase.storage.from('business-images').getPublicUrl(path);
+    payload.imagen_url = pub.publicUrl;
+    statusEl.textContent = '✓ Foto subida.';
+  }
+
   const { error } = await supabase.from('businesses').update(payload).eq('id', id);
   if (error) { alert('Error guardando: ' + error.message); return; }
   await loadBusinesses();
