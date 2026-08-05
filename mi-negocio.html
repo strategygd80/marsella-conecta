@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Negocio — Marsella Conecta</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f6f9; --surface: #ffffff; --ink: #101828; --ink-muted: #667085;
+    --accent: #0d67a7; --accent2: #159957; --accent3: #1c74b3; --warn: #e48727;
+    --border: #e3e7ee; --radius: 14px; --card-shadow: 0 2px 12px rgba(16,24,40,0.06);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
+  nav {
+    position: sticky; top: 0; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; padding: 0 24px; height: 60px;
+    box-shadow: 0 1px 3px rgba(16,24,40,0.04);
+  }
+  .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; text-decoration: none; color: var(--ink); }
+  .nav-logo span { color: var(--accent); }
+  .nav-links a { color: var(--ink-muted); text-decoration: none; font-size: 0.82rem; font-weight: 600; }
+  .btn-logout { background: none; border: 1.5px solid var(--border); border-radius: 20px; padding: 6px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; color: var(--ink); }
+
+  .shell { max-width: 720px; margin: 0 auto; padding: 32px 20px 60px; }
+  .page-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem; margin-bottom: 6px; }
+  .page-sub { color: var(--ink-muted); font-size: 0.88rem; margin-bottom: 26px; }
+
+  .login-shell { max-width: 380px; margin: 80px auto; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; text-align: center; box-shadow: var(--card-shadow); }
+  .login-shell h1 { font-family: 'Syne', sans-serif; font-size: 1.2rem; margin-bottom: 6px; }
+  .login-shell p { color: var(--ink-muted); font-size: 0.85rem; margin-bottom: 22px; }
+
+  .field { text-align: left; margin-bottom: 14px; }
+  .field label { display: block; font-size: 0.78rem; font-weight: 700; margin-bottom: 4px; }
+  .field input, .field textarea {
+    width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.88rem; background: var(--bg); outline: none;
+  }
+  .field input:focus, .field textarea:focus { border-color: var(--accent); background: #fff; }
+  .field textarea { min-height: 70px; resize: vertical; }
+  .hint { font-size: 0.72rem; color: var(--ink-muted); margin-top: 4px; }
+
+  .btn { display: inline-block; border: none; border-radius: 9px; padding: 10px 18px; font-weight: 700; font-size: 0.85rem; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.15s; }
+  .btn:hover { opacity: 0.88; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary.full { width: 100%; }
+  .btn-ghost { background: var(--bg); color: var(--ink); border: 1.5px solid var(--border); }
+  .error-text { color: #dc2626; font-size: 0.8rem; margin-top: 8px; display: none; }
+  .success-text { color: var(--accent2); font-size: 0.8rem; margin-top: 8px; display: none; }
+
+  .section-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; margin: 30px 0 12px; }
+  .section-title:first-of-type { margin-top: 0; }
+
+  .biz-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 12px; box-shadow: var(--card-shadow); }
+  .biz-card-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .biz-card-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; }
+  .biz-card-meta { font-size: 0.78rem; color: var(--ink-muted); margin-top: 2px; }
+  .badge { font-size: 0.62rem; font-weight: 700; padding: 3px 9px; border-radius: 6px; text-transform: uppercase; }
+  .badge-active { background: #e3f5eb; color: var(--accent2); }
+  .badge-pending { background: #fff1e6; color: var(--warn); }
+  .manage-panel { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); display: none; }
+  .manage-panel.active { display: block; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .current-photo { width: 100%; max-width: 220px; aspect-ratio: 4/3; object-fit: cover; border-radius: 8px; margin-bottom: 8px; display: block; }
+  .upload-status { font-size: 0.78rem; color: var(--ink-muted); margin-top: 6px; }
+
+  .claim-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .claim-row:last-child { border-bottom: none; }
+  .claim-form { display: none; margin-top: 10px; padding: 12px; background: var(--bg); border-radius: 10px; }
+  .claim-form.active { display: block; }
+  .empty-note { text-align: center; color: var(--ink-muted); font-size: 0.85rem; padding: 24px 0; }
+  .search-mini { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 20px; font-size: 0.85rem; font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 14px; }
+  .search-mini:focus { border-color: var(--accent); }
+  .loading { text-align: center; padding: 24px; color: var(--ink-muted); font-size: 0.85rem; }
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <nav><a href="index.html" class="nav-logo">Marsella<span>Conecta</span></a><div></div></nav>
+  <div class="login-shell">
+    <h1>🏪 Mi Negocio</h1>
+    <p>Inicia sesión con tu cuenta de vecino para reclamar y administrar tu ficha de negocio.</p>
+    <div class="field"><label>Correo</label><input type="email" id="loginEmail" placeholder="tu@correo.com"></div>
+    <div class="field"><label>Contraseña</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
+    <button class="btn btn-primary full" id="loginBtn" onclick="doLogin()">Ingresar</button>
+    <div class="error-text" id="loginError"></div>
+    <p style="margin-top:16px;font-size:0.8rem">¿No tienes cuenta? <a href="register-user.html" style="color:var(--accent)">Regístrate aquí</a></p>
+  </div>
+</div>
+
+<div id="dashboard" style="display:none">
+  <nav>
+    <a href="index.html" class="nav-logo">Marsella<span>Conecta</span></a>
+    <button class="btn-logout" onclick="doLogout()">Cerrar sesión</button>
+  </nav>
+  <div class="shell">
+    <div class="page-title">Mi Negocio</div>
+    <div class="page-sub">Administra tus fichas o reclama un negocio que ya registraste.</div>
+
+    <div class="section-title">📋 Mis Negocios</div>
+    <div id="myBizList"><div class="loading">Cargando...</div></div>
+
+    <div class="section-title">🔍 Reclamar un Negocio</div>
+    <p style="font-size:0.82rem;color:var(--ink-muted);margin-bottom:12px">Si registraste tu negocio antes de tener una cuenta de vecino, búscalo aquí y confirma el correo que usaste al registrarlo para vincularlo a tu cuenta.</p>
+    <input type="text" class="search-mini" id="claimSearch" placeholder="Buscar el nombre de tu negocio..." oninput="renderClaimable()">
+    <div id="claimList"><div class="loading">Cargando negocios...</div></div>
+  </div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const SUPABASE_URL = 'https://kydazssjktgsagayuupo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5ZGF6c3Nqa3Rnc2FnYXl1dXBvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NTg2NTYsImV4cCI6MjEwMDQzNDY1Nn0.YPXJ2cJjTcKZDPTo2o6Wkhs3-9CGZISujsPvAwKWpx4';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let myProfile = null;
+let myBusinesses = [];
+let unclaimedBusinesses = [];
+let expandedManageId = null;
+let expandedClaimId = null;
+
+// Resize + re-encode any uploaded photo so nobody can accidentally
+// ship a multi-MB image to every visitor of the directory.
+function compressImage(file, maxWidth = 1200, maxHeight = 1200, quality = 0.82) {
+  return new Promise((resolve) => {
+    if (!file || !file.type.startsWith('image/')) { resolve(file); return; }
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if (width > maxWidth || height > maxHeight) {
+        const ratio = Math.min(maxWidth / width, maxHeight / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      canvas.toBlob(blob => {
+        if (!blob) { resolve(file); return; }
+        resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }));
+      }, 'image/jpeg', quality);
+    };
+    img.onerror = () => resolve(file);
+    img.src = url;
+  });
+}
+
+async function checkLoginAndBoot() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return showLogin();
+
+  const { data: profile } = await supabase.from('profiles').select('*').eq('auth_user_id', session.user.id).single();
+  if (!profile) return showLogin('No se encontró tu perfil de vecino. Contacta al administrador.');
+
+  myProfile = profile;
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  loadAll();
+}
+
+function showLogin(err) {
+  document.getElementById('loginScreen').style.display = 'block';
+  document.getElementById('dashboard').style.display = 'none';
+  const errEl = document.getElementById('loginError');
+  if (err) { errEl.textContent = err; errEl.style.display = 'block'; }
+}
+
+window.doLogin = async function() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const btn = document.getElementById('loginBtn');
+  const errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+
+  if (!email || !password) { errEl.textContent = 'Ingresa tu correo y contraseña.'; errEl.style.display = 'block'; return; }
+
+  btn.disabled = true; btn.textContent = 'Verificando...';
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  btn.disabled = false; btn.textContent = 'Ingresar';
+
+  if (error) { errEl.textContent = 'Credenciales incorrectas.'; errEl.style.display = 'block'; return; }
+  checkLoginAndBoot();
+};
+
+window.doLogout = async function() {
+  await supabase.auth.signOut();
+  window.location.reload();
+};
+
+async function loadAll() {
+  const { data: mine } = await supabase.from('businesses').select('*').eq('owner_profile_id', myProfile.id).order('nombre');
+  myBusinesses = mine || [];
+  renderMyBusinesses();
+
+  const { data: all } = await supabase.from('businesses').select('id,nombre,categoria,barrio,owner_profile_id').is('owner_profile_id', null).order('nombre');
+  unclaimedBusinesses = all || [];
+  renderClaimable();
+}
+
+function renderMyBusinesses() {
+  const el = document.getElementById('myBizList');
+  if (!myBusinesses.length) { el.innerHTML = '<div class="empty-note">Aún no administras ningún negocio. Reclama uno abajo, o <a href="register.html" style="color:var(--accent)">registra uno nuevo</a>.</div>'; return; }
+
+  el.innerHTML = myBusinesses.map(b => {
+    const isOpen = expandedManageId === b.id;
+    const badgeClass = b.estado === 'Activo' ? 'badge-active' : 'badge-pending';
+    return `<div class="biz-card">
+      <div class="biz-card-top">
+        <div>
+          <div class="biz-card-name">${b.nombre} <span class="badge ${badgeClass}">${b.estado}</span></div>
+          <div class="biz-card-meta">${b.categoria || ''}${b.barrio ? ' · ' + b.barrio : ''}</div>
+        </div>
+        <button class="btn btn-ghost" onclick="window.toggleManage('${b.id}')">${isOpen ? 'Cerrar' : 'Administrar'}</button>
+      </div>
+      <div class="manage-panel ${isOpen ? 'active' : ''}">
+        <div class="field-row">
+          <div class="field"><label>Teléfono</label><input type="text" id="mb_tel_${b.id}" value="${(b.telefono||'').replace(/"/g,'&quot;')}"></div>
+          <div class="field"><label>Horario</label><input type="text" id="mb_horario_${b.id}" value="${(b.horario||'').replace(/"/g,'&quot;')}"></div>
+        </div>
+        <div class="field"><label>Descripción</label><textarea id="mb_desc_${b.id}">${b.descripcion || ''}</textarea></div>
+        <div class="field">
+          <label>Foto (800×600px recomendado)</label>
+          ${b.imagen_url ? `<img class="current-photo" src="${b.imagen_url}" alt="">` : ''}
+          <input type="file" id="mb_imagen_${b.id}" accept="image/*">
+          <div class="upload-status" id="mb_upload_status_${b.id}"></div>
+        </div>
+        <button class="btn btn-primary" onclick="window.saveMyBiz('${b.id}')">Guardar Cambios</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.toggleManage = function(id) {
+  expandedManageId = expandedManageId === id ? null : id;
+  renderMyBusinesses();
+};
+
+window.saveMyBiz = async function(id) {
+  const statusEl = document.getElementById(`mb_upload_status_${id}`);
+  const payload = {
+    telefono: document.getElementById(`mb_tel_${id}`).value.trim(),
+    horario: document.getElementById(`mb_horario_${id}`).value.trim(),
+    descripcion: document.getElementById(`mb_desc_${id}`).value.trim(),
+  };
+
+  const fileInput = document.getElementById(`mb_imagen_${id}`);
+  const rawFile = fileInput?.files[0];
+  if (rawFile) {
+    statusEl.textContent = 'Optimizando y subiendo foto...';
+    const file = await compressImage(rawFile);
+    const path = `biz-${id}-${Date.now()}.jpg`;
+    const { error: uploadErr } = await supabase.storage.from('business-images').upload(path, file, { upsert: true });
+    if (uploadErr) { statusEl.textContent = ''; alert('Error subiendo la foto: ' + uploadErr.message); return; }
+    const { data: pub } = supabase.storage.from('business-images').getPublicUrl(path);
+    payload.imagen_url = pub.publicUrl;
+    statusEl.textContent = '✓ Foto subida.';
+  }
+
+  const { error } = await supabase.from('businesses').update(payload).eq('id', id);
+  if (error) { alert('Error guardando: ' + error.message); return; }
+  await loadAll();
+  alert('¡Cambios guardados!');
+};
+
+function renderClaimable() {
+  const q = (document.getElementById('claimSearch').value || '').toLowerCase().trim();
+  const list = q ? unclaimedBusinesses.filter(b => (b.nombre || '').toLowerCase().includes(q)) : unclaimedBusinesses.slice(0, 15);
+
+  const el = document.getElementById('claimList');
+  if (!list.length) { el.innerHTML = `<div class="empty-note">${q ? 'No se encontraron negocios con ese nombre.' : 'No hay negocios sin reclamar en este momento.'}</div>`; return; }
+
+  el.innerHTML = list.map(b => {
+    const isOpen = expandedClaimId === b.id;
+    return `<div class="claim-row-wrap">
+      <div class="claim-row">
+        <div>
+          <div class="biz-card-name" style="font-size:0.88rem">${b.nombre}</div>
+          <div class="biz-card-meta">${b.categoria || ''}${b.barrio ? ' · ' + b.barrio : ''}</div>
+        </div>
+        <button class="btn btn-ghost" onclick="window.toggleClaim('${b.id}')">${isOpen ? 'Cancelar' : 'Reclamar'}</button>
+      </div>
+      <div class="claim-form ${isOpen ? 'active' : ''}">
+        <div class="field">
+          <label>Correo usado al registrar este negocio</label>
+          <input type="email" id="claim_email_${b.id}" placeholder="correo@ejemplo.com">
+        </div>
+        <button class="btn btn-primary" onclick="window.submitClaim('${b.id}')">Confirmar y Reclamar</button>
+        <div class="error-text" id="claim_error_${b.id}"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.toggleClaim = function(id) {
+  expandedClaimId = expandedClaimId === id ? null : id;
+  renderClaimable();
+};
+
+window.submitClaim = async function(id) {
+  const email = document.getElementById(`claim_email_${id}`).value.trim();
+  const errEl = document.getElementById(`claim_error_${id}`);
+  errEl.style.display = 'none';
+
+  if (!email) { errEl.textContent = 'Ingresa el correo usado al registrar el negocio.'; errEl.style.display = 'block'; return; }
+
+  const { data, error } = await supabase.rpc('claim_business', { p_business_id: id, p_claim_email: email });
+
+  if (error) { errEl.textContent = 'Error: ' + error.message; errEl.style.display = 'block'; return; }
+  if (!data) { errEl.textContent = 'El correo no coincide con el registrado para este negocio, o ya fue reclamado.'; errEl.style.display = 'block'; return; }
+
+  expandedClaimId = null;
+  await loadAll();
+  alert('¡Negocio reclamado con éxito! Ya puedes administrarlo arriba.');
+};
+
+checkLoginAndBoot();
+</script>
+</body>
+</html>
