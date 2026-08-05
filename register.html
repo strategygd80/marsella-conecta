@@ -7,8 +7,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f5f2ec; --surface: #ffffff; --ink: #1a1714; --ink-muted: #7a7168;
-    --accent: #e8390e; --accent2: #2d6a4f; --gold: #c9a84c; --border: #e2ddd6;
+    --bg: #f4f6f9; --surface: #ffffff; --ink: #101828; --ink-muted: #667085;
+    --accent: #0d67a7; --accent2: #159957; --warn: #e48727; --gold: #c9a84c; --border: #e3e7ee;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); }
@@ -181,6 +181,12 @@
         <textarea id="f_desc" placeholder="Detalla los servicios o productos..."></textarea>
       </div>
 
+      <div class="field">
+        <label>Foto del negocio (opcional)</label>
+        <input type="file" id="f_imagen" accept="image/*">
+        <div class="hint">Recomendado: 800×600px, formato JPG o WebP, menos de 300KB. Se mostrará en tu ficha del directorio.</div>
+      </div>
+
       <div class="btn-row">
         <button type="button" class="btn-next" onclick="validateAndNext(1)">Continuar →</button>
       </div>
@@ -328,6 +334,22 @@ async function dispatchDirectToSheets() {
   const businessName = document.getElementById('f_nombre').value.trim();
   const selectedTier = document.querySelector('input[name="plan"]:checked')?.value || 'Gratuito';
 
+  let imagenUrl = null;
+  const imageFile = document.getElementById('f_imagen').files[0];
+  if (imageFile) {
+    targetBtn.textContent = 'Subiendo foto...';
+    const ext = imageFile.name.split('.').pop();
+    const path = `biz-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error: uploadErr } = await supabase.storage.from('business-images').upload(path, imageFile);
+    if (uploadErr) {
+      alert('No se pudo subir la foto (tu ficha se guardará sin ella): ' + uploadErr.message);
+    } else {
+      const { data: pub } = supabase.storage.from('business-images').getPublicUrl(path);
+      imagenUrl = pub.publicUrl;
+    }
+    targetBtn.textContent = 'Guardando ficha...';
+  }
+
   const { data: biz, error: bizErr } = await supabase
     .from('businesses')
     .insert({
@@ -339,6 +361,7 @@ async function dispatchDirectToSheets() {
       horario: document.getElementById('f_horario').value || null,
       origen: document.getElementById('f_source').value || null,
       plan: selectedTier,
+      imagen_url: imagenUrl,
     })
     .select('id')
     .single();
