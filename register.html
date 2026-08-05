@@ -326,6 +326,34 @@ function goToStep(n) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// Resize + re-encode any uploaded photo so nobody can accidentally
+// ship a multi-MB image to every visitor of the directory.
+function compressImage(file, maxWidth = 1200, maxHeight = 1200, quality = 0.82) {
+  return new Promise((resolve) => {
+    if (!file || !file.type.startsWith('image/')) { resolve(file); return; }
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if (width > maxWidth || height > maxHeight) {
+        const ratio = Math.min(maxWidth / width, maxHeight / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      canvas.toBlob(blob => {
+        if (!blob) { resolve(file); return; }
+        resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }));
+      }, 'image/jpeg', quality);
+    };
+    img.onerror = () => resolve(file);
+    img.src = url;
+  });
+}
+
 async function dispatchDirectToSheets() {
   const targetBtn = document.getElementById('submitBtn');
   targetBtn.disabled = true;
@@ -335,11 +363,12 @@ async function dispatchDirectToSheets() {
   const selectedTier = document.querySelector('input[name="plan"]:checked')?.value || 'Gratuito';
 
   let imagenUrl = null;
-  const imageFile = document.getElementById('f_imagen').files[0];
-  if (imageFile) {
+  const rawImageFile = document.getElementById('f_imagen').files[0];
+  if (rawImageFile) {
+    targetBtn.textContent = 'Optimizando foto...';
+    const imageFile = await compressImage(rawImageFile);
     targetBtn.textContent = 'Subiendo foto...';
-    const ext = imageFile.name.split('.').pop();
-    const path = `biz-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const path = `biz-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
     const { error: uploadErr } = await supabase.storage.from('business-images').upload(path, imageFile);
     if (uploadErr) {
       alert('No se pudo subir la foto (tu ficha se guardará sin ella): ' + uploadErr.message);
